@@ -37,11 +37,14 @@ jobs:
           issuePrefix: "MS-"
       - name: Authenticate DevHub
         if: steps.branchFilter.outputs.matches == 'true'
-        env:
-          SALESFORCE_JWT_KEY: ${{ secrets.SALESFORCE_JWT_KEY }}
         run: |
-          echo "${SALESFORCE_JWT_KEY}" > server.key
-          npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
+          echo "${{ secrets.SALESFORCE_JWT_KEY }}" > server.key
+          npx sfdx force:auth:jwt:grant \
+            --clientid ${{ secrets.SALESFORCE_CLIENT_ID }} \
+            --jwtkeyfile server.key \
+            --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} \
+            --setdefaultdevhubusername -a DevHub
+          rm server.key
       - name: Extract Branch Name
         if: steps.branchFilter.outputs.matches == 'true'
         shell: bash
