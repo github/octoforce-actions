@@ -1,0 +1,21 @@
+name: "Branch Filter"
+description: "Parses a related issue number from the current branch and determines whether the branch name meets certain criteria."
+inputs:
+  issuePrefix:
+    description: "The text that precedes issue numbers in key branch names"
+    required: true
+    default: "issue-"
+  branchName:
+    description: "The name of the branch to be parsed.  If ommitted, github.context.ref will be used."
+    required: false
+    default: null
+outputs:
+  matches:
+    description: 'Whether the branch name matches the pattern /${issuePrefix}-\d+$'
+  issueNumber:
+    description: "The related issue number"
+  branchName:
+    description: "Name of the related branch"
+runs:
+  using: "node12"
+  main: "index.js"
