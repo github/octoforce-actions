@@ -44,12 +44,12 @@ jobs:
         run: |
           echo "${SALESFORCE_JWT_KEY}" > server.key
           npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
-      - name: Extract branch name
+      - name: Extract Branch Name
         if: steps.branchFilter.outputs.matches == 'true'
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
-      - name: Create Dev Org
+      - name: Create Dev Sandbox
         if: steps.branchFilter.outputs.matches == 'true'
         run: |
           set +e
@@ -63,7 +63,7 @@ jobs:
           else
             exit $?
           fi
-      - name: Create Uat Org
+      - name: Create UAT Sandbox
         if: steps.branchFilter.outputs.matches == 'true'
         run: |
           set +e
@@ -77,12 +77,12 @@ jobs:
           else
             exit $?
           fi
-      - name: Delete old artifacts
+      - name: Delete Old Artifacts
         if: steps.releaseFilter.outputs.matches == 'true'
         run: |
           git rm release-notes/release.md || true
           git pull
-      - name: Commit artifact deletion
+      - name: Commit Artifact Deletion
         if: steps.releaseFilter.outputs.matches == 'true'
         uses: stefanzweifel/git-auto-commit-action@75802d269e7721b5146d08f6063ba3097c55ad2b
         with:
