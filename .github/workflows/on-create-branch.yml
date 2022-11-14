@@ -1,4 +1,4 @@
-# This workflow runs when a branch is created or invoked via dispatch
+# This workflow runs when a branch is created
 name: Branch Creation Handler
 on: create
 jobs:
