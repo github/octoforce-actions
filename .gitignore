@@ -38,3 +38,6 @@ $RECYCLE.BIN/
 
 # Local environment variables
 .env
+
+# Salesforce JWT Key generated in Workflows
+server.key
