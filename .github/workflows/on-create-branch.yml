@@ -1,7 +1,8 @@
 # This workflow runs when a branch is created or invoked via dispatch
 name: Branch Creation Handler
-on: 
-  create
+on:
+  create:
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
