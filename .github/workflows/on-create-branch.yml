@@ -2,7 +2,7 @@
 name: Branch Creation Handler
 on: create
 jobs:
-  build:
+  create-sandboxes:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
