@@ -1,8 +1,8 @@
 {
-  "name": "salesforce-app",
+  "name": "octoforce",
   "private": true,
   "version": "1.0.0",
-  "description": "Salesforce App",
+  "description": "A lightweight open-source Salesforce CI/CD framework built on the GitHub platform.",
   "scripts": {
     "lint": "eslint **/{aura,lwc}/**",
     "test": "npm run test:unit",
@@ -16,6 +16,7 @@
     "precommit": "lint-staged"
   },
   "devDependencies": {
+    "@actions/core": "^1.10.0",
     "@lwc/eslint-plugin-lwc": "^1.1.2",
     "@prettier/plugin-xml": "^2.0.1",
     "@salesforce/cli": "^1.53.0",

@@ -1,0 +1,112 @@
+name: Release Branch Pull Request Handler
+on:
+  pull_request:
+    branches:
+      - "MS-[0-9]+"
+deploy-to-uat-sandbox:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.SCOPED_PAT }}
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - name: Cache node modules
+        uses: actions/cache@v2
+        id: npm_cache_id
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
+            ${{ runner.os }}-
+      - name: Install Dependencies
+        if: steps.npm_cache_id.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Parse Issue Number
+        uses: ./.github/actions/branch-filter
+        id: branchFilter
+        with:
+          branchName: ${{ github.head_ref }}
+          issuePrefix: "issue-"
+      - name: Install sfdx Plugins
+        if: steps.branchFilter.outputs.matches == 'true'
+        run: |
+          pushd .
+          cd ~/.config && mkdir sfdx && cd ./sfdx
+          echo '["sfdx-deliverability-access","@rdietrick/sfdx-profile-decompose"]' > unsignedPluginAllowList.json
+          popd
+          npx sfdx plugins:install sfdx-deliverability-access @rdietrick/sfdx-profile-decompose
+      - name: Recompose profiles
+        if: steps.branchFilter.outputs.matches == 'true'
+        run: |
+          npx sfdx profiles:aggregate
+          rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
+      - name: Check First Deploy
+        if: steps.branchFilter.outputs.matches == 'true'
+        id: check_first_deploy
+        run: |
+          if [ -f release-notes/issue-${{ steps.branchFilter.outputs.issueNumber }}.md ]; then echo "::set-output name=FIRST_DEPLOY::false"; else echo "::set-output name=FIRST_DEPLOY::true"; fi
+      - name: Generate Destructive Changes Param
+        if: steps.branchFilter.outputs.matches == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
+        id: check_for_destructive_changes
+        run: |
+          if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
+          then 
+            echo ::set-output name=DESTRUCTIVE_FILES::'--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml';
+          elif [ -f destructive-changes/destructiveChangesPre.xml ]
+          then 
+            echo ::set-output name=DESTRUCTIVE_FILES::'--predestructivechanges destructive-changes/destructiveChangesPre.xml';
+          elif [ -f destructive-changes/destructiveChangesPost.xml ]
+          then 
+            echo ::set-output name=DESTRUCTIVE_FILES::'--postdestructivechanges destructive-changes/destructiveChangesPost.xml';
+          fi
+      - name: Authenticate to UAT Sandbox
+        if: steps.branchFilter.outputs.matches == 'true'
+        env:
+          LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
+        run: |
+          openssl version
+          openssl enc -d -aes-256-cbc -in ${LOGIN_ENC_FILE}.enc -out ${LOGIN_ENC_FILE} -k ${{ secrets.SANDBOX_URL_ENCRYPTION_KEY }} -md sha256
+          npx sfdx force:auth:sfdxurl:store -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
+          npx sfdx force:org:display --json -u is${{ steps.branchFilter.outputs.issueNumber }}uat > sfdx-auth.json
+      - name: Set Email Deliverability Access Level to All Email
+        if: steps.branchFilter.outputs.matches == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
+        run: |
+          npx sfdx deliverability:access --level All -u is${{ steps.branchFilter.outputs.issueNumber }}uat
+      - name: Deploy Source to Sandbox
+        if: steps.branchFilter.outputs.matches == 'true'
+        env:
+          LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
+        run: |
+          npx sfdx force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
+          npx sfdx force:source:deploy -u is${{ steps.branchFilter.outputs.issueNumber }}uat -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
+      - name: Init Release Notes
+        id: init-release-notes
+        if: steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.SCOPED_PAT }}
+          ISSUE_URL: https://api.github.com/repos/github/salesforce/issues/${{ steps.branchFilter.outputs.issueNumber }}
+        run: |
+          git fetch origin ${{ github.head_ref }}
+          curl -H "Authorization: Bearer ${GITHUB_TOKEN}" -s ${ISSUE_URL} > issue.json
+          ISSUE_HTML_URL=$(jq -r '.html_url' issue.json)
+          ISSUE_TITLE=$(jq -r '.title' issue.json)
+          touch release-notes/issue-${{ steps.branchFilter.outputs.issueNumber }}.md
+          echo -e "1. [#${{ steps.branchFilter.outputs.issueNumber }} - ${ISSUE_TITLE}](${ISSUE_HTML_URL})\n" > release-notes/issue-${{ steps.branchFilter.outputs.issueNumber }}.md
+          ISSUE_JSON="$(cat issue.json)"
+          ISSUE_JSON="${ISSUE_JSON//'%'/'%25'}"
+          ISSUE_JSON="${ISSUE_JSON//$'\n'/'%0A'}"
+          ISSUE_JSON="${ISSUE_JSON//$'\r'/'%0D'}"
+          echo "::set-output name=ISSUE::$ISSUE_JSON"
+          rm issue.json
+      - uses: stefanzweifel/git-auto-commit-action@75802d269e7721b5146d08f6063ba3097c55ad2b
+        if: steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
+        with:
+          branch: ${{ github.head_ref }}
+          commit_message: Add issue release notes
+          file_pattern: release-notes/issue-${{ steps.branchFilter.outputs.issueNumber }}.md

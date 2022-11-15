@@ -1,0 +1,46 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": [
+    "@salesforce/eslint-config-lwc/recommended",
+    "@salesforce/eslint-config-lwc/i18n"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "rules": {
+    // General
+    "eqeqeq": "warn",
+    "no-unused-vars": "warn",
+    "no-trailing-spaces": "warn",
+    "no-unused-expressions": "warn",
+    "no-undef": "warn",
+    "no-unused-labels": "warn",
+    "array-callback-return": "warn",
+    "consistent-return": "warn",
+    "no-shadow": "warn",
+    "no-await-in-loop": "warn",
+    "no-throw-literal": "warn",
+    "no-use-before-define": "warn",
+    "no-return-await": "warn",
+    "guard-for-in": "warn",
+    "no-useless-escape": "warn",
+    "vars-on-top": "warn",
+    "dot-notation": "warn",
+    "no-redeclare": "warn",
+    "no-else-return": "warn",
+    "no-alert": "warn",
+    "no-useless-catch": "warn",
+    "no-dupe-class-members": "warn",
+    // Jest
+    "jest/valid-expect": "warn",
+    // LWC
+    "@lwc/lwc/no-leading-uppercase-api-name": "warn",
+    "@lwc/lwc/no-api-reassignments": "warn",
+    "@lwc/lwc/no-async-operation": "warn",
+    "@lwc/lwc/prefer-custom-event": "warn"
+  }
+}
