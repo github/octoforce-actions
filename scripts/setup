@@ -1,0 +1,71 @@
+#!/bin/bash
+
+set -e
+
+while [ "$1" != "" ]; do
+    case $1 in
+        --no-plugin-install )   noPlugins=true
+                                ;;
+    esac
+    shift
+done
+
+if ! which jq > /dev/null
+then
+    echo "===> Installing jq"
+    brew install jq
+fi
+
+if ! which gawk  > /dev/null
+then
+    echo "===> Installing gawk"
+    brew install gawk
+fi
+
+if ! which openssl  > /dev/null
+then
+    echo "===> Installing openssl"
+    brew install openssl
+fi
+
+if ! which gh  > /dev/null
+then
+    echo "===> Installing GitHub CLI" 
+    brew install gh
+fi
+
+echo "===> Installing all dependencies from package.json"
+npm install
+
+# this does not seem to work, find out how to identify if sfdx is installed globally
+if ! which sfdx > /dev/null
+then
+    echo "===> Installing sfdx CLI (globally)" 
+    npm install sfdx-cli --global
+fi
+
+if [[ $noPlugins ]]; then
+    echo "===> Skipping SFDX plugin installation."
+else
+    if [ ! -d "sfdx-plugins" ]
+    then
+        mkdir sfdx-plugins
+    fi
+    cd sfdx-plugins
+
+    echo "===> Installing sfdx-profile-decompose plugin "
+    sfdx plugins:install @rdietrick/sfdx-profile-decompose
+    
+    echo "===> Installing Email Deliverability Access plugin"
+    sfdx plugins:install sfdx-deliverability-access
+
+    echo "===> Installing sfdx-plugin-prettier plugin "
+    sfdx plugins:install @jayree/sfdx-plugin-prettier
+
+    cd ../
+
+    echo
+    echo "Installed SFDX Plugins:"
+    sfdx plugins
+    echo -e "\nSetup completed."
+fi
