@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-node@v3.5.1
         with:
           node-version: "14"
-      - name: Cache node modules
+      - name: Cache Node Modules
         uses: actions/cache@v3.0.11
         id: npm_cache_id
         with:
@@ -41,7 +41,7 @@ jobs:
           echo '["sfdx-deliverability-access","@rdietrick/sfdx-profile-decompose"]' > unsignedPluginAllowList.json
           popd
           npx sfdx plugins:install sfdx-deliverability-access @rdietrick/sfdx-profile-decompose
-      - name: Recompose profiles
+      - name: Recompose Profiles
         if: steps.branchFilter.outputs.matches == 'true'
         run: |
           npx sfdx profiles:aggregate
