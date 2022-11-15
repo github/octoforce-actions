@@ -3,8 +3,8 @@ on:
   pull_request:
     branches:
       - "MS-[0-9]+"
-deploy-to-uat-sandbox:
-  build:
+jobs:
+  deploy-to-uat-sandbox:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
