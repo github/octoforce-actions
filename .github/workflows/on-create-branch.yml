@@ -33,6 +33,7 @@ jobs:
       - name: Check Release Branch
         uses: ./.github/actions/branch-filter
         id: releaseFilter
+        if: ${{ env.GENERATE_RELEASE == 'true' }}
         with:
           issuePrefix: "MS-"
       - name: Authenticate DevHub
@@ -79,12 +80,12 @@ jobs:
             exit $?
           fi
       - name: Delete Old Artifacts
-        if: steps.releaseFilter.outputs.matches == 'true'
+        if: ${{ env.GENERATE_RELEASE == 'true' }} && steps.releaseFilter.outputs.matches == 'true'
         run: |
           git rm release-notes/release.md || true
           git pull
       - name: Commit Artifact Deletion
-        if: steps.releaseFilter.outputs.matches == 'true'
+        if: ${{ env.GENERATE_RELEASE == 'true' }} && steps.releaseFilter.outputs.matches == 'true'
         uses: stefanzweifel/git-auto-commit-action@75802d269e7721b5146d08f6063ba3097c55ad2b
         with:
           branch: ${{ github.ref }}
