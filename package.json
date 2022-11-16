@@ -1,5 +1,5 @@
 {
-  "name": "octoforce",
+  "name": "octoforce-actions",
   "private": true,
   "version": "1.0.0",
   "description": "A lightweight open-source Salesforce CI/CD framework built on the GitHub platform.",
@@ -28,9 +28,9 @@
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-jest": "^26.1.2",
     "husky": "^7.0.4",
-    "lint-staged": "^12.3.7",
-    "prettier": "^2.6.0",
-    "prettier-plugin-apex": "^1.10.0",
+    "lint-staged": "^12.5.0",
+    "prettier": "^2.7.1",
+    "prettier-plugin-apex": "^1.11.0",
     "sfdx-cli": "^7.176.1"
   },
   "lint-staged": {
