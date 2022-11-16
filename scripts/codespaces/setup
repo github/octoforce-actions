@@ -1,0 +1,17 @@
+#!/bin/bash
+
+npm install
+
+pushd .
+cd ~/.config && mkdir sfdx && cd ./sfdx
+echo '["sfdx-deliverability-access", "@rdietrick/sfdx-profile-decompose", "@jayree/sfdx-plugin-prettier"]' > unsignedPluginAllowList.json
+popd
+sfdx plugins:install @rdietrick/sfdx-profile-decompose sfdx-deliverability-access @jayree/sfdx-plugin-prettier
+
+pushd .
+cd ~/.local/share/sfdx/node_modules/puppeteer && npm install
+popd
+
+npm install --save-dev prettier prettier-plugin-apex lint-staged husky
+
+exit
