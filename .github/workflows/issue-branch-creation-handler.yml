@@ -26,16 +26,18 @@ jobs:
         if: steps.npm_cache_id.outputs.cache-hit != 'true'
         run: npm ci
       - name: Filter branch
-        uses: ./.github/actions/branch-filter
         id: branchFilter
         with:
           issuePrefix: "issue-"
+        run: |
+          node ./node-scripts/branch-filter.js
       - name: Check Release Branch
-        uses: ./.github/actions/branch-filter
         id: releaseFilter
         if: ${{ env.GENERATE_RELEASE == 'true' }}
         with:
           issuePrefix: "MS-"
+        run: |
+          node ./node-scripts/branch-filter.js
       - name: Authenticate DevHub
         if: steps.branchFilter.outputs.matches == 'true'
         run: |
