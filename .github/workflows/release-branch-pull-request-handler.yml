@@ -28,11 +28,12 @@ jobs:
         if: steps.npm_cache_id.outputs.cache-hit != 'true'
         run: npm ci
       - name: Parse Issue Number
-        uses: ./.github/actions/branch-filter
         id: branchFilter
         with:
           branchName: ${{ github.head_ref }}
           issuePrefix: "issue-"
+        run: |
+          node ./node-scripts/branch-filter.js
       - name: Install sfdx Plugins
         if: steps.branchFilter.outputs.matches == 'true'
         run: |
