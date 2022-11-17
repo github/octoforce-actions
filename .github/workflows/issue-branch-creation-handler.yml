@@ -33,7 +33,7 @@ jobs:
           node ./node-scripts/branch-filter.js
       - name: Check Release Branch
         id: releaseFilter
-        if: ${{ env.GENERATE_RELEASE == 'true' }}
+        if: vars.GENERATE_RELEASE == 'true'
         with:
           issuePrefix: "MS-"
         run: |
@@ -82,12 +82,12 @@ jobs:
             exit $?
           fi
       - name: Delete Old Artifacts
-        if: ${{ env.GENERATE_RELEASE == 'true' }} && steps.releaseFilter.outputs.matches == 'true'
+        if: vars.GENERATE_RELEASE == 'true' && steps.releaseFilter.outputs.matches == 'true'
         run: |
           git rm release-notes/release.md || true
           git pull
       - name: Commit Artifact Deletion
-        if: ${{ env.GENERATE_RELEASE == 'true' }} && steps.releaseFilter.outputs.matches == 'true'
+        if: vars.GENERATE_RELEASE == 'true' && steps.releaseFilter.outputs.matches == 'true'
         uses: stefanzweifel/git-auto-commit-action@75802d269e7721b5146d08f6063ba3097c55ad2b
         with:
           branch: ${{ github.ref }}

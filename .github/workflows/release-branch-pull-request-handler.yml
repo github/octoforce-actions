@@ -48,7 +48,7 @@ jobs:
           npx sfdx profiles:aggregate
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
       - name: Check First Deploy
-        if: ${{ env.GENERATE_RELEASE == 'true' }} && steps.branchFilter.outputs.matches == 'true'
+        if: vars.GENERATE_RELEASE == 'true' && steps.branchFilter.outputs.matches == 'true'
         id: check_first_deploy
         run: |
           if [ -f release-notes/issue-${{ steps.branchFilter.outputs.issueNumber }}.md ]; then echo "::set-output name=FIRST_DEPLOY::false"; else echo "::set-output name=FIRST_DEPLOY::true"; fi
@@ -88,7 +88,7 @@ jobs:
           npx sfdx force:source:deploy -u is${{ steps.branchFilter.outputs.issueNumber }}uat -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
       - name: Init Release Notes
         id: init-release-notes
-        if: ${{ env.GENERATE_RELEASE == 'true' }} && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
+        if: vars.GENERATE_RELEASE == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.SCOPED_PAT }}
           ISSUE_URL: https://api.github.com/repos/github/salesforce/issues/${{ steps.branchFilter.outputs.issueNumber }}
@@ -106,7 +106,7 @@ jobs:
           echo "::set-output name=ISSUE::$ISSUE_JSON"
           rm issue.json
       - uses: stefanzweifel/git-auto-commit-action@v4.15.4
-        if: ${{ env.GENERATE_RELEASE == 'true' }} && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
+        if: vars.GENERATE_RELEASE == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
         with:
           branch: ${{ github.head_ref }}
           commit_message: Add issue release notes
