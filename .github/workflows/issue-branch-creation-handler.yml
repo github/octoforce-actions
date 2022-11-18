@@ -27,17 +27,15 @@ jobs:
         run: npm ci
       - name: Filter branch
         id: branchFilter
-        with:
-          issuePrefix: "issue-"
-        run: |
-          node ./node-scripts/branch-filter.js
+        env:
+          ISSUE_PREFIX: vars.ISSUE_BRANCH_PREFIX
+        run: node ./node-scripts/branch-filter.js
       - name: Check Release Branch
         id: releaseFilter
         if: vars.GENERATE_RELEASE == 'true'
-        with:
-          issuePrefix: "MS-"
-        run: |
-          node ./node-scripts/branch-filter.js
+        env:
+          ISSUE_PREFIX: vars.RELEASE_BRANCH_PREFIX
+        run: node ./node-scripts/branch-filter.js
       - name: Authenticate DevHub
         if: steps.branchFilter.outputs.matches == 'true'
         run: |
