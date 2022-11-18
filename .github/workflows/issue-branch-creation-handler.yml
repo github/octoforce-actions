@@ -43,7 +43,7 @@ jobs:
           npx sfdx force:auth:jwt:grant \
             --clientid ${{ secrets.SALESFORCE_CLIENT_ID }} \
             --jwtkeyfile server.key \
-            --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} \
+            --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} \
             --setdefaultdevhubusername -a DevHub
           rm server.key
       - name: Extract Branch Name
