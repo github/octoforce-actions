@@ -29,15 +29,13 @@ jobs:
         id: branchFilter
         env:
           ISSUE_PREFIX: vars.ISSUE_BRANCH_PREFIX
-        run: |
-          node ./node-scripts/branch-filter.js
+        run: node ./node-scripts/branch-filter.js
       - name: Check Release Branch
         id: releaseFilter
         if: vars.GENERATE_RELEASE == 'true'
         env:
           ISSUE_PREFIX: vars.RELEASE_BRANCH_PREFIX
-        run: |
-          node ./node-scripts/branch-filter.js
+        run: node ./node-scripts/branch-filter.js
       - name: Authenticate DevHub
         if: steps.branchFilter.outputs.matches == 'true'
         run: |
