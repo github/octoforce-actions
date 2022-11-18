@@ -3,7 +3,7 @@ const github = require("@actions/github");
 
 (function start() {
   try {
-    const issuePrefix = core.getInput("issuePrefix");
+    const issuePrefix = process.env.ISSUE_PREFIX;
     let ref = core.getInput("branchName");
     if (!ref) {
       ref = github.context.ref;
