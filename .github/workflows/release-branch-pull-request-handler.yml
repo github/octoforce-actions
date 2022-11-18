@@ -50,20 +50,20 @@ jobs:
         if: vars.GENERATE_RELEASE == 'true' && steps.branchFilter.outputs.matches == 'true'
         id: check_first_deploy
         run: |
-          if [ -f release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}${{ steps.branchFilter.outputs.issueNumber }}.md ]; then echo "::set-output name=FIRST_DEPLOY::false"; else echo "::set-output name=FIRST_DEPLOY::true"; fi
+          if [ -f release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}${{ steps.branchFilter.outputs.issueNumber }}.md ]; then echo "FIRST_DEPLOY=false" >> $GITHUB_OUTPUT; else echo "FIRST_DEPLOY=true" >> $GITHUB_OUTPUT; fi
       - name: Generate Destructive Changes Param
         if: steps.branchFilter.outputs.matches == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
         id: check_for_destructive_changes
         run: |
           if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
-            echo ::set-output name=DESTRUCTIVE_FILES::'--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml';
+            echo "DESTRUCTIVE_FILES='--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml'" >> $GITHUB_OUTPUT;
           elif [ -f destructive-changes/destructiveChangesPre.xml ]
           then 
-            echo ::set-output name=DESTRUCTIVE_FILES::'--predestructivechanges destructive-changes/destructiveChangesPre.xml';
+            echo "DESTRUCTIVE_FILES='--predestructivechanges destructive-changes/destructiveChangesPre.xml'" >> $GITHUB_OUTPUT;
           elif [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
-            echo ::set-output name=DESTRUCTIVE_FILES::'--postdestructivechanges destructive-changes/destructiveChangesPost.xml';
+            echo "DESTRUCTIVE_FILES='--postdestructivechanges destructive-changes/destructiveChangesPost.xml'" >> $GITHUB_OUTPUT;
           fi
       - name: Authenticate to UAT Sandbox
         if: steps.branchFilter.outputs.matches == 'true'
@@ -102,7 +102,7 @@ jobs:
           ISSUE_JSON="${ISSUE_JSON//'%'/'%25'}"
           ISSUE_JSON="${ISSUE_JSON//$'\n'/'%0A'}"
           ISSUE_JSON="${ISSUE_JSON//$'\r'/'%0D'}"
-          echo "::set-output name=ISSUE::$ISSUE_JSON"
+          echo "ISSUE=$ISSUE_JSON" >> $GITHUB_OUTPUT;
           rm issue.json
       - uses: stefanzweifel/git-auto-commit-action@v4.15.4
         if: vars.GENERATE_RELEASE == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
