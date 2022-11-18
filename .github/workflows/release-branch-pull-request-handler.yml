@@ -2,7 +2,7 @@ name: Release Branch Pull Request Handler
 on:
   pull_request:
     branches:
-      - "MS-[0-9]+"
+      - "${{ vars.RELEASE_BRANCH_PREFIX }}-[0-9]+"
 jobs:
   deploy-to-uat-sandbox:
     runs-on: ubuntu-latest
