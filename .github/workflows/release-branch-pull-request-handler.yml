@@ -50,7 +50,10 @@ jobs:
         if: vars.GENERATE_RELEASE == 'true' && steps.branchFilter.outputs.matches == 'true'
         id: check_first_deploy
         run: |
-          if [ -f release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}${{ steps.branchFilter.outputs.issueNumber }}.md ]; then echo "FIRST_DEPLOY=false" >> $GITHUB_OUTPUT; else echo "FIRST_DEPLOY=true" >> $GITHUB_OUTPUT; fi
+          if [ -f release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}${{ steps.branchFilter.outputs.issueNumber }}.md ]
+          then
+            echo "FIRST_DEPLOY=false" >> $GITHUB_OUTPUT; else echo "FIRST_DEPLOY=true" >> $GITHUB_OUTPUT;
+          fi
       - name: Generate Destructive Changes Param
         if: steps.branchFilter.outputs.matches == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
         id: check_for_destructive_changes
@@ -70,10 +73,8 @@ jobs:
         env:
           LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
         run: |
-          openssl version
           openssl enc -d -aes-256-cbc -in ${LOGIN_ENC_FILE}.enc -out ${LOGIN_ENC_FILE} -k ${{ secrets.SANDBOX_URL_ENCRYPTION_KEY }} -md sha256
           npx sfdx force:auth:sfdxurl:store -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
-          npx sfdx force:org:display --json -u is${{ steps.branchFilter.outputs.issueNumber }}uat > sfdx-auth.json
       - name: Set Email Deliverability Access Level to All Email
         if: steps.branchFilter.outputs.matches == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
         run: |
