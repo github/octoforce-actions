@@ -10,8 +10,6 @@
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "55.0",
   "plugins": {
-    "sfdx-deliverability-access": {},
-    "@rdietrick/sfdx-profile-decompose": {},
     "sfdx-plugin-prettier": {
       "enabled": true
     }
