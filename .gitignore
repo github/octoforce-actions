@@ -41,3 +41,6 @@ $RECYCLE.BIN/
 
 # Salesforce JWT Key generated in Workflows
 server.key
+
+# octoforce files
+auth/sandbox-login-url*.txt
