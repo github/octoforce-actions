@@ -10,7 +10,10 @@ jobs:
       - name: Test
         env:
           EVENT: ${{ toJson(github.event) }}
-        run: echo "$EVENT"
+          base_ref: ${{ github.event.pull_request.base.ref }}
+        run: |
+          echo "$EVENT"
+          echo "$base_ref"
       - name: Checkout
         uses: actions/checkout@v2.5.0
         with:
