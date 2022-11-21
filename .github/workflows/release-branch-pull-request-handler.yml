@@ -85,7 +85,7 @@ jobs:
           LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
         run: |
           npx sfdx force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
-          npx sfdx force:source:deploy -u is${{ steps.branchFilter.outputs.issueNumber }}uat -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
+          npx sfdx force:source:deploy -u is${{ steps.branchFilter.outputs.issueNumber }}uat -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w ${{ vars.DEPLOYMENT_TIMEOUT }} -l RunLocalTests
       - name: Init Release Notes
         id: init-release-notes
         if: vars.GENERATE_RELEASE == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
