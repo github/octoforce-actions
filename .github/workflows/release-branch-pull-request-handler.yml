@@ -2,10 +2,10 @@ name: Release Branch Pull Request Handler
 on:
   pull_request:
     branches:
-      - "${{ vars.RELEASE_BRANCH_PREFIX }}[0-9]+"
 jobs:
   deploy-to-uat-sandbox:
     runs-on: ubuntu-latest
+    if: startsWith(github.event.pull_request.base.ref, vars.RELEASE_BRANCH_PREFIX)
     steps:
       - name: Checkout
         uses: actions/checkout@v2.5.0
@@ -42,7 +42,7 @@ jobs:
           popd
           npx sfdx plugins:install sfdx-deliverability-access @rdietrick/sfdx-profile-decompose
       - name: Recompose Profiles
-        if: steps.branchFilter.outputs.matches == 'true'
+        if: steps.branchFilter.outputs.matches == 'true' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
         run: |
           npx sfdx profiles:aggregate
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
