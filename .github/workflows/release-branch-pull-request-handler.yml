@@ -50,7 +50,10 @@ jobs:
         if: vars.GENERATE_RELEASE == 'true' && steps.branchFilter.outputs.matches == 'true'
         id: check_first_deploy
         run: |
-          if [ -f release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}${{ steps.branchFilter.outputs.issueNumber }}.md ]; then echo "FIRST_DEPLOY=false" >> $GITHUB_OUTPUT; else echo "FIRST_DEPLOY=true" >> $GITHUB_OUTPUT; fi
+          if [ -f release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}${{ steps.branchFilter.outputs.issueNumber }}.md ]
+          then
+            echo "FIRST_DEPLOY=false" >> $GITHUB_OUTPUT; else echo "FIRST_DEPLOY=true" >> $GITHUB_OUTPUT;
+          fi
       - name: Generate Destructive Changes Param
         if: steps.branchFilter.outputs.matches == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
         id: check_for_destructive_changes
