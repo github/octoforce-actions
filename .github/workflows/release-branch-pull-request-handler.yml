@@ -7,6 +7,11 @@ jobs:
   deploy-to-uat-sandbox:
     runs-on: ubuntu-latest
     steps:
+      - name: Test
+        env:
+          TEST: ${{ github.event.pull_request }}
+        run: |
+          echo "$TEST"
       - name: Checkout
         uses: actions/checkout@v2.5.0
         with:
