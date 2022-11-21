@@ -7,13 +7,20 @@ jobs:
   deploy-to-uat-sandbox:
     runs-on: ubuntu-latest
     steps:
-      - name: Test
+      - name: Check Base Ref for Release Branch
+        id: check-base-ref-for-release-branch
         env:
-          EVENT: ${{ toJson(github.event) }}
-          base_ref: ${{ github.event.pull_request.base.ref }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
-          echo "$EVENT"
-          echo "$base_ref"
+          echo "$BASE_REF"
+          if [[ $BASE_REF =~ ${{ vars.RELEASE_BRANCH_PREFIX }}[0-9] ]]; then
+              echo "DEPLOY_TO_UAT=true" >> $GITHUB_OUTPUT
+          else
+              echo "DEPLOY_TO_UAT=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Test
+        run: |
+          echo ${{ steps.check-base-ref-for-release-branch.outputs.DEPLOY_TO_UAT }}
       - name: Checkout
         uses: actions/checkout@v2.5.0
         with:
