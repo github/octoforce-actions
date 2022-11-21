@@ -75,7 +75,6 @@ jobs:
         run: |
           openssl enc -d -aes-256-cbc -in ${LOGIN_ENC_FILE}.enc -out ${LOGIN_ENC_FILE} -k ${{ secrets.SANDBOX_URL_ENCRYPTION_KEY }} -md sha256
           npx sfdx force:auth:sfdxurl:store -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
-          npx sfdx force:org:display --json -u is${{ steps.branchFilter.outputs.issueNumber }}uat > sfdx-auth.json
       - name: Set Email Deliverability Access Level to All Email
         if: steps.branchFilter.outputs.matches == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
         run: |
