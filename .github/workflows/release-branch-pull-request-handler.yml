@@ -8,20 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     if: $BASE_REF =~ ${{ vars.RELEASE_BRANCH_PREFIX }}[0-9]
     steps:
-      - name: Check Base Ref for Release Branch
-        id: check-base-ref-for-release-branch
-        env:
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-        run: |
-          echo "$BASE_REF"
-          if [[ $BASE_REF =~ ${{ vars.RELEASE_BRANCH_PREFIX }}[0-9] ]]; then
-              echo "DEPLOY_TO_UAT=true" >> $GITHUB_OUTPUT
-          else
-              echo "DEPLOY_TO_UAT=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Test
-        run: |
-          echo ${{ steps.check-base-ref-for-release-branch.outputs.DEPLOY_TO_UAT }}
       - name: Checkout
         uses: actions/checkout@v2.5.0
         with:
@@ -57,7 +43,7 @@ jobs:
           popd
           npx sfdx plugins:install sfdx-deliverability-access @rdietrick/sfdx-profile-decompose
       - name: Recompose Profiles
-        if: steps.branchFilter.outputs.matches == 'true'
+        if: steps.branchFilter.outputs.matches == 'true' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS = 'false'
         run: |
           npx sfdx profiles:aggregate
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
