@@ -9,8 +9,8 @@ jobs:
     steps:
       - name: Test
         env:
-          PR_DATA: ${{ github.event.pull_request }}
-        run: echo "$PR_DATA"
+          EVENT: ${{ toJson(github.event) }}
+        run: echo "$EVENT"
       - name: Checkout
         uses: actions/checkout@v2.5.0
         with:
