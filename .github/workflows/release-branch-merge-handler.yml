@@ -4,7 +4,7 @@ on:
     branches:
 jobs:
   build:
-    name: Build
+    name: Clean Up Release Branch
     runs-on: ubuntu-latest
     if: startsWith(github.event.pull_request.base.ref, vars.RELEASE_BRANCH_PREFIX) && vars.GENERATE_RELEASE == 'true'
     steps:
@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2.5.0
         with:
           token: ${{ secrets.SCOPED_PAT }}
-      - name: Check If Issue Merge to PR
+      - name: Check for Issue Branch Merged
         id: check_merge
         run: |
           ISSUE_FILES=$(git diff --name-only HEAD^ HEAD -- 'release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md')
@@ -28,10 +28,10 @@ jobs:
         run: |
           BRANCH=$(basename ${{ github.ref }})
           echo "BRANCH=$BRANCH" >> $GITHUB_OUTPUT;
-      - name: Compile release notes
+      - name: Compile Release Notes
         if: steps.check_merge.outputs.IS_MERGE == 'true'
         run: scripts/create_release_notes.sh release-notes/release.md
-      - name: Delete artifacts
+      - name: Delete Artifacts
         if: steps.check_merge.outputs.IS_MERGE == 'true'
         run: |
           rm release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md || true
