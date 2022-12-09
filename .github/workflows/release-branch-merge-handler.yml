@@ -26,7 +26,7 @@ jobs:
         id: export-branch
         run: |
           BRANCH=$(basename ${{ github.ref }})
-          echo ::set-output name=BRANCH::$BRANCH
+          echo "BRANCH=$BRANCH" >> $GITHUB_OUTPUT;
       - name: Compile release notes
         if: steps.check_merge.outputs.IS_MERGE == 'true'
         run: scripts/create_release_notes.sh release-notes/release.md
