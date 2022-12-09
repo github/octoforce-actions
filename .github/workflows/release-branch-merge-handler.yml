@@ -16,7 +16,8 @@ jobs:
         id: check_merge
         run: |
           ISSUE_FILES=$(git diff --name-only HEAD^ HEAD -- 'release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md')
-          if [ -z "$ISSUE_FILES" ] ; then
+          if [ -z "$ISSUE_FILES" ]
+          then
             echo "IS_MERGE=false" >> $GITHUB_OUTPUT;
           else
             echo "IS_MERGE=true" >> $GITHUB_OUTPUT;
