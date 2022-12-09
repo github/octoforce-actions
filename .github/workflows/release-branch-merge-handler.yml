@@ -30,7 +30,23 @@ jobs:
           echo "BRANCH=$BRANCH" >> $GITHUB_OUTPUT;
       - name: Compile Release Notes
         if: steps.check_merge.outputs.IS_MERGE == 'true' && vars.GENERATE_RELEASE == 'true'
-        run: scripts/create_release_notes.sh release-notes/release.md
+        run: |
+          if [ls release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md 1> /dev/null 2>&1]
+          then
+              if [ ! -f $1 ]
+              then
+                  echo "### Includes the following items" > $1
+                  echo >> $1
+              fi
+              for ISSUE_NOTES in `ls release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md`
+              do
+                  NOTES=`cat ${ISSUE_NOTES}`
+                  if ! grep -q "${NOTES}" $1
+                  then
+                      echo "${NOTES}" >> $1
+                  fi
+              done
+          fi
       - name: Delete Artifacts
         if: steps.check_merge.outputs.IS_MERGE == 'true'
         run: |
