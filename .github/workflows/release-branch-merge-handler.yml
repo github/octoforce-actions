@@ -29,7 +29,7 @@ jobs:
           BRANCH=$(basename ${{ github.ref }})
           echo "BRANCH=$BRANCH" >> $GITHUB_OUTPUT;
       - name: Compile Release Notes
-        if: steps.check_merge.outputs.IS_MERGE == 'true' && && vars.GENERATE_RELEASE == 'true'
+        if: steps.check_merge.outputs.IS_MERGE == 'true' && vars.GENERATE_RELEASE == 'true'
         run: scripts/create_release_notes.sh release-notes/release.md
       - name: Delete Artifacts
         if: steps.check_merge.outputs.IS_MERGE == 'true'
