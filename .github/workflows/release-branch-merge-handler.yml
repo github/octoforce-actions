@@ -6,7 +6,7 @@ jobs:
   build:
     name: Clean Up Release Branch
     runs-on: ubuntu-latest
-    if: startsWith(github.event.pull_request.base.ref, vars.RELEASE_BRANCH_PREFIX) && vars.GENERATE_RELEASE == 'true'
+    if: startsWith(github.event.pull_request.base.ref, vars.RELEASE_BRANCH_PREFIX)
     steps:
       - name: Checkout
         uses: actions/checkout@v2.5.0
@@ -29,12 +29,12 @@ jobs:
           BRANCH=$(basename ${{ github.ref }})
           echo "BRANCH=$BRANCH" >> $GITHUB_OUTPUT;
       - name: Compile Release Notes
-        if: steps.check_merge.outputs.IS_MERGE == 'true'
+        if: steps.check_merge.outputs.IS_MERGE == 'true' && && vars.GENERATE_RELEASE == 'true'
         run: scripts/create_release_notes.sh release-notes/release.md
       - name: Delete Artifacts
         if: steps.check_merge.outputs.IS_MERGE == 'true'
         run: |
-          rm release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md || true
+          if [${{ vars.GENERATE_RELEASE }} == 'true']; then rm release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md || true
           rm auth/sandbox-login-url-issue-* || true
       - uses: stefanzweifel/git-auto-commit-action@v4.15.4
         if: steps.check_merge.outputs.IS_MERGE == 'true'
