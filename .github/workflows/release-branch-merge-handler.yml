@@ -1,0 +1,42 @@
+name: Release Branch Merge Handler
+on:
+  push:
+    branches:
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.pull_request.base.ref, vars.RELEASE_BRANCH_PREFIX) && vars.GENERATE_RELEASE == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.5.0
+        with:
+          token: ${{ secrets.SCOPED_PAT }}
+      - name: Check If Issue Merge to PR
+        id: check_merge
+        run: |
+          ISSUE_FILES=$(git diff --name-only HEAD^ HEAD -- 'release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md')
+          if [ -z "$ISSUE_FILES" ] ; then
+            echo "IS_MERGE=false" >> $GITHUB_OUTPUT;
+          else
+            echo "IS_MERGE=true" >> $GITHUB_OUTPUT;
+          fi
+      - name: Export Branch
+        if: steps.check_merge.outputs.IS_MERGE == 'true'
+        id: export-branch
+        run: |
+          BRANCH=$(basename ${{ github.ref }})
+          echo ::set-output name=BRANCH::$BRANCH
+      - name: Compile release notes
+        if: steps.check_merge.outputs.IS_MERGE == 'true'
+        run: scripts/create_release_notes.sh release-notes/release.md
+      - name: Delete artifacts
+        if: steps.check_merge.outputs.IS_MERGE == 'true'
+        run: |
+          rm release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md || true
+          rm auth/sandbox-login-url-issue-* || true
+      - uses: stefanzweifel/git-auto-commit-action@v4.15.4
+        if: steps.check_merge.outputs.IS_MERGE == 'true'
+        with:
+          branch: ${{ github.ref }}
+          commit_message: Add issue release notes and remove .enc file.
