@@ -51,16 +51,3 @@ echo ${LOGIN_URL} > ${LOGIN_URL_FILE}
 openssl enc -aes-256-cbc -k "${SANDBOX_URL_ENCRYPTION_KEY}" -in ${LOGIN_URL_FILE} -out ${LOGIN_URL_FILE}.enc -md sha256
 git add ${LOGIN_URL_FILE}.enc
 echo -e "Encrypted login URL has been staged and stored in: ${GREEN}${LOGIN_URL_FILE}.enc${COLOR_RESET}\n"
-
-INSTANCE_URL=$(echo "$ORG_INFO" | awk -F "Instance Url" '{print $2}' | xargs)
-INSTANCE_LIGHTNING_URL=$(echo $INSTANCE_URL | sed -e 's/my\.sales/lightning\./g')
-EMAIL_SETTINGS_URL="${BLUE_BOLD}${INSTANCE_LIGHTNING_URL}/lightning/setup/OrgEmailSettings/home${COLOR_RESET}"
-plugins=$(sfdx plugins)
-if [[ ! $plugins =~ "deliverability-access" ]];
-then
-    echo -e "${YELLOW}Use the following URL to turn on Email Deliverability access in UAT:${COLOR_RESET}\n${EMAIL_SETTINGS_URL}"
-else
-    echo -e "${YELLOW}Note:${COLOR_RESET} Attempting to turn on Email Deliverability access using sfdx-deliverability-access plugin..."
-    sfdx deliverability:access -l all -u $UAT_ALIAS
-    echo -e "\n${YELLOW}If sfdx-deliverability-access failed use the following URL to turn on Email Deliverability access in UAT:${COLOR_RESET}\n${EMAIL_SETTINGS_URL}"
-fi
