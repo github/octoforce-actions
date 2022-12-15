@@ -4,6 +4,7 @@ on:
     branches:
 jobs:
   build:
+    if: startsWith(github.event.ref, 'refs/heads/' + vars.RELEASE_BRANCH_PREFIX)
     name: Clean Up Release Branch
     runs-on: ubuntu-latest
     steps:
