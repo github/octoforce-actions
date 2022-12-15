@@ -14,10 +14,8 @@ jobs:
           token: ${{ secrets.SCOPED_PAT }}
       - name: Check for Issue Branch Merged
         id: check_merge
-        env:
-          ISSUE_BRANCH_PREFIX: ${{ vars.ISSUE_BRANCH_PREFIX }}
         run: |
-          ISSUE_FILES=$(git diff --name-only HEAD^ HEAD -- "release-notes/$ISSUE_BRANCH_PREFIX*.md")
+          ISSUE_FILES=$(git diff --name-only HEAD^ HEAD -- 'release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md')
           if [ -z "$ISSUE_FILES" ]
           then
             echo "IS_MERGE=false" >> $GITHUB_OUTPUT;
