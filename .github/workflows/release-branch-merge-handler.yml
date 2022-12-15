@@ -12,8 +12,10 @@ jobs:
         with:
           token: ${{ secrets.SCOPED_PAT }}
       - name: testing
+        env:
+          JSON_EVENT_DATA: ${{ toJSON(github.event.issue) }}
         run: |
-          echo ${{ github.event }}
+          echo $JSON_EVENT_DATA
       - name: Check for Issue Branch Merged
         id: check_merge
         run: |
