@@ -20,7 +20,7 @@ jobs:
         run: |
           echo "$TEST_REF";
           echo "$TEST_REF_CHECK";
-          echo ${{ vars.ISSUE_BRANCH_PREFIX }};
+          echo ${{ vars.RELEASE_BRANCH_PREFIX }};
       - name: Check for Issue Branch Merged
         id: check_merge
         run: |
