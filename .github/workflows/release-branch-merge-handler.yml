@@ -11,6 +11,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2.5.0
         with:
+          fetch-depth: 0
           token: ${{ secrets.SCOPED_PAT }}
       - name: Testing
         env:
