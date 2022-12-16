@@ -16,7 +16,7 @@ jobs:
         if: startsWith(github.event.ref, join('refs/heads/', vars.RELEASE_BRANCH_PREFIX))
         env:
           TEST_REF: ${{ github.event.ref }}
-          TEST_REF_CHECK: format('{{refs/heads/{0}}}', vars.RELEASE_BRANCH_PREFIX)
+          TEST_REF_CHECK: ${{ format('{{refs/heads/{0}}}', vars.RELEASE_BRANCH_PREFIX) }}
         run: |
           echo "$TEST_REF";
           echo "$TEST_REF_CHECK";
