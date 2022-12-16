@@ -6,17 +6,20 @@ jobs:
   build:
     name: Clean Up Release Branch
     runs-on: ubuntu-latest
-    if: startsWith(github.event.ref, 'refs/heads/' + vars.RELEASE_BRANCH_PREFIX)
+    if: startsWith(github.event.ref, format('refs/heads/{0}', vars.RELEASE_BRANCH_PREFIX))
     steps:
       - name: Checkout
         uses: actions/checkout@v2.5.0
         with:
           token: ${{ secrets.SCOPED_PAT }}
-      - name: testing
+      - name: Testing
         env:
-          JSON_EVENT_DATA: ${{ toJSON(github) }}
+          TEST_REF: ${{ github.event.ref }}
+          TEST_REF_CHECK: ${{ format('refs/heads/{0}', vars.RELEASE_BRANCH_PREFIX) }}
         run: |
-          echo $JSON_EVENT_DATA
+          echo "$TEST_REF";
+          echo "$TEST_REF_CHECK";
+          echo ${{ vars.RELEASE_BRANCH_PREFIX }};
       - name: Check for Issue Branch Merged
         id: check_merge
         run: |
