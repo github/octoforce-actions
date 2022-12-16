@@ -6,7 +6,7 @@ jobs:
   build:
     name: Clean Up Release Branch
     runs-on: ubuntu-latest
-    if: startsWith(github.event.ref, join('refs/heads/', vars.RELEASE_BRANCH_PREFIX))
+    if: startsWith(github.event.ref, format('refs/heads/{0}', vars.RELEASE_BRANCH_PREFIX))
     steps:
       - name: Checkout
         uses: actions/checkout@v2.5.0
