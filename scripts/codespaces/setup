@@ -1,14 +1,15 @@
 #!/bin/bash
 
 npm install
+
 SFDX_PLUGINS=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins[]')
-if [ ! -z "$SFDX_PLUGINS" ]; then
-    pushd .
-    cd ~/.config && mkdir sfdx && cd ./sfdx
-    echo $SFDX_PLUGINS | jq -R -s -c 'split("\n")[:-1]' > unsignedPluginAllowList.json
-    popd
-    sfdx plugins:install $SFDX_PLUGINS
-fi
+mkdir -p $HOME/.config/sfdx
+pushd .
+cd $HOME/.config/sfdx
+echo $SFDX_PLUGINS | jq -R -s -c 'split("\n")[:-1]' > unsignedPluginAllowList.json
+popd
+echo "$SFDX_PLUGINS"
+sfdx plugins:install $SFDX_PLUGINS
 
 npm install --save-dev prettier prettier-plugin-apex lint-staged husky
 
