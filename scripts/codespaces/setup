@@ -2,15 +2,13 @@
 
 npm install
 SFDX_PLUGINS=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins[]')
-pushd .
-cd ~/.config && mkdir sfdx && cd ./sfdx
-echo $SFDX_PLUGINS | jq -R -s -c 'split("\n")[:-1]' > unsignedPluginAllowList.json
-popd
-sfdx plugins:install $SFDX_PLUGINS
-
-pushd .
-cd ~/.local/share/sfdx/node_modules/puppeteer && npm install
-popd
+if [ ! -z "$SFDX_PLUGINS" ]; then
+    pushd .
+    cd ~/.config && mkdir sfdx && cd ./sfdx
+    echo $SFDX_PLUGINS | jq -R -s -c 'split("\n")[:-1]' > unsignedPluginAllowList.json
+    popd
+    sfdx plugins:install $SFDX_PLUGINS
+fi
 
 npm install --save-dev prettier prettier-plugin-apex lint-staged husky
 
