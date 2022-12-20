@@ -54,12 +54,14 @@ else
     cd sfdx-plugins
 
     SFDX_PLUGINS=$(cat ../config/dev-config.json | jq -r '.sfdxPlugins[]')
-    echo "===> Installing sfdx plugins"
-    for plugin in $SFDX_PLUGINS
-    do
-        echo "Installing $plugin"
-        sfdx plugins:install $plugin
-    done
+    if [ -z "$SFDX_PLUGINS" ]; then
+        echo "===> Installing sfdx plugins"
+        for plugin in $SFDX_PLUGINS
+        do
+            echo "Installing $plugin"
+            sfdx plugins:install $plugin
+        done
+    fi
 
     cd ../
 
