@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if [ -d "node_modules" ]; then
+    rm -r node_modules
+fi
+
+if [ -f "package-lock.json" ]; then
+    rm package-lock.json
+fi
+
 npm install
 
 SFDX_PLUGINS=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins[]')
