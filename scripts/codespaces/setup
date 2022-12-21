@@ -2,9 +2,10 @@
 
 if [ -d "node_modules" ]; then
     rm -r node_modules
+    REMOVE_PACKAGE_LOCK=true
 fi
 
-if [ -f "package-lock.json" ]; then
+if [ -f "package-lock.json" && "$REMOVE_PACKAGE_LOCK" = true ]; then
     rm package-lock.json
 fi
 
@@ -15,6 +16,8 @@ mkdir -p $HOME/.config/sfdx
 pushd .
 cd $HOME/.config/sfdx
 echo $SFDX_PLUGINS | jq -R -s -c 'split("\n")[:-1]' > unsignedPluginAllowList.json
+echo "$PWD"
+ls
 popd
 echo "$SFDX_PLUGINS"
 sfdx plugins:install $SFDX_PLUGINS
