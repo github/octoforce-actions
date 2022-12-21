@@ -1,16 +1,31 @@
 #!/bin/bash
 
-npm install
-SFDX_PLUGINS=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins[]')
-pushd .
-cd ~/.config && mkdir sfdx && cd ./sfdx
-echo $SFDX_PLUGINS | jq -R -s -c 'split("\n")[:-1]' > unsignedPluginAllowList.json
-popd
-sfdx plugins:install $SFDX_PLUGINS
+if [ -d "node_modules" ]; then
+    rm -r node_modules
+    REMOVE_PACKAGE_LOCK=true
+fi
 
-pushd .
-cd ~/.local/share/sfdx/node_modules/puppeteer && npm install
-popd
+if [ -f "package-lock.json" ] && [ "$REMOVE_PACKAGE_LOCK" = true ]; then
+    rm package-lock.json
+fi
+
+npm install
+
+SFDX_PLUGINS=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins[]')
+
+if [[ ! -z "${SFDX_PLUGINS// }" ]]; then
+    PLUGIN_ALLOW_LIST=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins')
+    mkdir -p $HOME/.config/sfdx
+    pushd .
+    cd $HOME/.config/sfdx
+    echo "$PLUGIN_ALLOW_LIST" > unsignedPluginAllowList.json
+    popd
+    sfdx plugins:install $SFDX_PLUGINS
+fi
+
+if [[ "$SFDX_PLUGINS" == *"sfdx-deliverability-access"* ]]; then
+  cd ~/.local/share/sfdx/node_modules/puppeteer && npm install
+fi
 
 npm install --save-dev prettier prettier-plugin-apex lint-staged husky
 
