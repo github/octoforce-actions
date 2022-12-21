@@ -15,9 +15,10 @@ SFDX_PLUGINS=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins[]')
 mkdir -p $HOME/.config/sfdx
 pushd .
 cd $HOME/.config/sfdx
-echo $SFDX_PLUGINS | jq -R -s -c 'split("\n")[:-1]' > unsignedPluginAllowList.json
+cat /workspaces/octoforce-actions/config/dev-config.json | jq -r '.sfdxPlugins' > unsignedPluginAllowList.json
 echo "$PWD"
 ls
+cat unsignedPluginAllowList.json
 popd
 echo "$SFDX_PLUGINS"
 sfdx plugins:install $SFDX_PLUGINS
