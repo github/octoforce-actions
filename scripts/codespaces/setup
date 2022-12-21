@@ -10,6 +10,7 @@ if [ -f "package-lock.json" ] && [ "$REMOVE_PACKAGE_LOCK" = true ]; then
 fi
 
 npm install
+# npm install --save-dev prettier prettier-plugin-apex lint-staged husky
 
 SFDX_PLUGINS=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins[]')
 
@@ -26,7 +27,5 @@ fi
 if [[ "$SFDX_PLUGINS" == *"sfdx-deliverability-access"* ]]; then
   cd ~/.local/share/sfdx/node_modules/puppeteer && npm install
 fi
-
-npm install --save-dev prettier prettier-plugin-apex lint-staged husky
 
 exit
