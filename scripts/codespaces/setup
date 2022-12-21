@@ -5,7 +5,7 @@ if [ -d "node_modules" ]; then
     REMOVE_PACKAGE_LOCK=true
 fi
 
-if [ -f "package-lock.json" && "$REMOVE_PACKAGE_LOCK" = true ]; then
+if [ -f "package-lock.json" ] && [ "$REMOVE_PACKAGE_LOCK" = true ]; then
     rm package-lock.json
 fi
 
