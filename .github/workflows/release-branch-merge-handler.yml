@@ -34,8 +34,11 @@ jobs:
         run: |
           if ls release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md 1> /dev/null 2>&1
           then
-              echo "### Includes the following items" > 'release-notes/release.md'
-              echo >> 'release-notes/release.md'
+              if [ ! -f 'release-notes/release.md' ]
+              then
+                  echo "### Includes the following items" > 'release-notes/release.md'
+                  echo >> 'release-notes/release.md'
+              fi
               for ISSUE_NOTES in `ls release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md`
               do
                   NOTES=`cat ${ISSUE_NOTES}`
