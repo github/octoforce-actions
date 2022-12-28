@@ -19,9 +19,7 @@ if [[ ! -z "${SFDX_PLUGINS// }" ]]; then
 fi
 
 if [[ "$SFDX_PLUGINS" == *"sfdx-deliverability-access"* ]]; then
-  cd ~/.local/share/sfdx/node_modules/puppeteer && npm install
+    cd ~/.local/share/sfdx/node_modules/puppeteer && npm install
 fi
-
-npm install --save-dev prettier prettier-plugin-apex lint-staged husky
 
 exit
