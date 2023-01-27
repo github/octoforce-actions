@@ -1,0 +1,15 @@
+---
+version: 1
+ownership:
+- name: octoforce-actions
+  long_name: octoforce-actions
+  description: A lightweight open-source template Salesforce CI/CD built on the GitHub
+    actions platform.
+  kind: artifact
+  repo: https://github.com/github/octoforce-actions
+  qos: maintenance
+  team: github/salesforce-eng
+  maintainer: cloudyjohnny
+  exec_sponsor: patil-pramod
+  sev3:
+    issue: https://github.com/github/octoforce-actions/issues
