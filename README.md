@@ -22,7 +22,7 @@ This project is meant to be helpful guide and starting for Salesforce developers
 
 ## Requirements
 
-NodeJS 14.x is the minimum requirement for this project. More recent versions of NodeJS are still being tested.
+NodeJS 14.x is the minimum requirement for this project. More recent versions of NodeJS are still being tested. We are currently testing Node 18.x and have found issues with authentication against sandboxes using `SFDX` web auth flow.
 The setup scripts require MacOS to run locally, however is not required to make use of this template.
 The sandbox authentication script requires `SFDX` to be installed and configured and requires a bash environment.
 
