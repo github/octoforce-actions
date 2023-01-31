@@ -55,9 +55,6 @@ else
 
     echo "===> Installing sfdx-profile-decompose plugin "
     sfdx plugins:install @rdietrick/sfdx-profile-decompose
-    
-    echo "===> Installing Email Deliverability Access plugin"
-    sfdx plugins:install sfdx-deliverability-access
 
     echo "===> Installing sfdx-plugin-prettier plugin "
     sfdx plugins:install @jayree/sfdx-plugin-prettier
