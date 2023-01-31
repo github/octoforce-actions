@@ -53,13 +53,11 @@ else
     fi
     cd sfdx-plugins
 
-    SFDX_PLUGINS=$(cat ../config/dev-config.json | jq -r '.sfdxPlugins[]')
-    echo "===> Installing sfdx plugins"
-    for plugin in $SFDX_PLUGINS
-    do
-        echo "Installing $plugin"
-        sfdx plugins:install $plugin
-    done
+    echo "===> Installing sfdx-profile-decompose plugin "
+    sfdx plugins:install @rdietrick/sfdx-profile-decompose
+
+    echo "===> Installing sfdx-plugin-prettier plugin "
+    sfdx plugins:install @jayree/sfdx-plugin-prettier
 
     cd ../
 

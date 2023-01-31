@@ -4,9 +4,9 @@ npm install
 SFDX_PLUGINS=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins[]')
 pushd .
 cd ~/.config && mkdir sfdx && cd ./sfdx
-echo $SFDX_PLUGINS | jq -R -s -c 'split("\n")[:-1]' > unsignedPluginAllowList.json
+echo '["@rdietrick/sfdx-profile-decompose", "@jayree/sfdx-plugin-prettier"]' > unsignedPluginAllowList.json
 popd
-sfdx plugins:install $SFDX_PLUGINS
+sfdx plugins:install @rdietrick/sfdx-profile-decompose @jayree/sfdx-plugin-prettier
 
 pushd .
 cd ~/.local/share/sfdx/node_modules/puppeteer && npm install
