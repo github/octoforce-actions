@@ -1,0 +1,196 @@
+on:
+  push:
+    branches:
+      - "main"
+
+name: Create Release
+
+jobs:
+  release-to-production:
+    name: Release to Production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@885641592076c27bfb56c028cd5612cdad63e16d
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BOT_USER_SCOPED_PAT }}
+
+      - name: Checkout tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      - name: Setup Node
+        uses: actions/setup-node@377c6dae4006fcd73be5aac564ee449b1a5d63f7
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Authorize external workspace
+        run: |
+          git config --global --add safe.directory /github/workspace
+
+      - name: Did Metadata Change
+        uses: rdietrick/did-files-change@12ed863b722bc28052850c22b28a37f38b6eca8d
+        id: requires-deploy
+        with:
+          pathspec: force-app
+
+      - name: Check If Release
+        id: check_release
+        run: |
+          NOTE_FILES=$(git diff --name-only HEAD^ HEAD -- 'release-notes/release.md')
+          if [ -z "$NOTE_FILES" ] ; then
+            echo ::set-output name=IS_RELEASE::false
+          else
+            echo ::set-output name=IS_RELEASE::true
+          fi
+
+      - name: Install Salesforce CLI
+        if: steps.requires-deploy.outputs.changed == '1'
+        run: |
+          npm install sfdx-cli
+          node_modules/sfdx-cli/bin/run --version
+          node_modules/sfdx-cli/bin/run plugins --core
+
+      - name: Checkout plugin
+        if: steps.requires-deploy.outputs.changed == '1'
+        uses: actions/checkout@885641592076c27bfb56c028cd5612cdad63e16d
+        with:
+          repository: github/sfdx-profile-decompose
+          path: sfdx-profile-decompose
+          token: ${{ secrets.PLUGIN_CHECKOUT_TOKEN }}
+          ref: v1.1
+
+      - name: Install custom sfdx plugins
+        if: steps.requires-deploy.outputs.changed == '1'
+        run: |
+          cd sfdx-profile-decompose
+          npm install
+          cd ../
+          node_modules/sfdx-cli/bin/run plugins:link sfdx-profile-decompose
+
+      - name: Authenticate DevHub
+        if: steps.requires-deploy.outputs.changed == '1'
+        run: |
+          echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
+          sudo node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
+          sudo node_modules/sfdx-cli/bin/run force:org:display --json -u DevHub > sfdx-auth.json
+
+      - name: Recompose profiles
+        if: steps.requires-deploy.outputs.changed == '1'
+        run: |
+          npx sfdx profiles:aggregate
+          rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
+
+      - name: Generate Destructive Changes Param
+        if: steps.requires-deploy.outputs.changed == '1'
+        id: check_for_destructive_changes
+        run: |
+          if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
+          then 
+            echo ::set-output name=DESTRUCTIVE_FILES::'--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml';
+          elif [ -f destructive-changes/destructiveChangesPre.xml ]
+          then 
+            echo ::set-output name=DESTRUCTIVE_FILES::'--predestructivechanges destructive-changes/destructiveChangesPre.xml';
+          elif [ -f destructive-changes/destructiveChangesPost.xml ]
+          then 
+            echo ::set-output name=DESTRUCTIVE_FILES::'--postdestructivechanges destructive-changes/destructiveChangesPost.xml';
+          fi
+
+      - name: Deploy to Production
+        if: steps.requires-deploy.outputs.changed == '1'
+        run: |
+          sudo node_modules/sfdx-cli/bin/run force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
+          sudo node_modules/sfdx-cli/bin/run force:source:deploy -u DevHub -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
+
+      - name: Get Previous Tag
+        if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
+        id: previous_tag
+        uses: WyriHaximus/github-action-get-previous-tag@3f018b4126e1d6652bcb11a64cb505e341b70c2d
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Get Next Tag Version
+        if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
+        id: current_tag
+        uses: WyriHaximus/github-action-next-semvers@2fc363e72936d52dbd53eaa72f2c2db0d9207707
+        with:
+          version: ${{ steps.previous_tag.outputs.tag }}
+
+      - name: Get Date
+        if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
+        id: get_date
+        run: |
+          TODAYS_DATE=$(date +'%b %d, %Y')
+          echo ::set-output name=RELEASE_DATE::$TODAYS_DATE
+
+      - name: Tag Main
+        if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
+        run: git tag ${{ steps.current_tag.outputs.v_minor }}
+
+      - name: Create Release
+        if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
+        id: create_release
+        uses: actions/create-release@c38d3a140cc22e67e265c5d5b6b4888d1f02533f
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.current_tag.outputs.v_patch }}
+          release_name: ${{ steps.get_date.outputs.RELEASE_DATE }} Release
+          body_path: release-notes/release.md
+          draft: false
+          prerelease: false
+
+      - name: Comment on shipped issues
+        if: steps.requires-deploy.outputs.changed == '1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMMENT_BODY="The metadata for this issue has been shipped to production. Please do any post-deployment steps and close the issue and delete your sandbox."
+          x=$(<release-notes/release.md)
+          regex='issues\/([0-9]+)'
+          for current_string in ${x[@]}; do
+            if [[ ${current_string} =~ $regex ]]; then
+              ISSUE_URL=https://api.github.com/repos/github/salesforce/issues/${BASH_REMATCH[1]}
+              curl -s -X POST -H 'Content-Type:application/json' -H "Authorization: Bearer ${GITHUB_TOKEN}" -d "{\"body\":\"$COMMENT_BODY\"}" "$ISSUE_URL/comments"
+              curl -s -X POST -H 'Contect-Type:application/json' -H "Authorization: Bearer ${GITHUB_TOKEN}" -d "{\"labels\":[\"In Production\"]}" "$ISSUE_URL/labels"
+            fi
+          done
+
+      - name: Authenticate Template sandbox
+        if: steps.requires-deploy.outputs.changed == '1'
+        run: |
+          echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > template-server.key
+          sudo node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwtkeyfile template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} -a Template --instanceurl https://test.salesforce.com
+          sudo node_modules/sfdx-cli/bin/run force:org:display --json -u Template > sfdx-auth.json
+        env:
+          SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}
+
+      - name: update Template sandbox
+        if: steps.requires-deploy.outputs.changed == '1'
+        run: |
+          sudo node_modules/sfdx-cli/bin/run force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
+          sudo node_modules/sfdx-cli/bin/run force:source:deploy -u Template -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
+          sudo node ./node-scripts/org-js-init.js -f sfdx-auth.json
+
+      - name: Create PR with cleaned up destructive changes
+        if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
+        env:
+          PAT: ${{ secrets.BOT_USER_SCOPED_PAT }}
+          USER_EMAIL: ${{ secrets.BOT_USER_EMAIL }}
+          USER_NAME: ${{ secrets.BOT_USER_NAME }}
+        run: |
+          if [ -f destructive-changes/destructiveChanges.xml ] || [ -f destructive-changes/destructiveChangesPre.xml ] || [ -f destructive-changes/destructiveChangesPost.xml ]
+          then 
+            RELEASE_DATE=$(date +'%Y-%m-%d')
+            echo $PAT | gh auth login --with-token
+            git config --global user.email "$USER_EMAIL"
+            git config --global user.name "$USER_NAME"
+
+            git checkout -b clean-up-destructive-changes-"$RELEASE_DATE" && git push --set-upstream origin clean-up-destructive-changes-"$RELEASE_DATE"
+            git rm -r destructive-changes
+            git commit -m "Clean up destructive changes from release" && git push
+
+            gh pr create --title "Clean up destructive changes" \
+            --body "Please merge \`clean-up-destructive-changes-$RELEASE_DATE\` into \`main\` and delete \`clean-up-destructive-changes-$RELEASE_DATE\`." \
+            -H clean-up-destructive-changes-"$RELEASE_DATE" -B main \
+            -r github/salesforce-reviewers
+          fi
