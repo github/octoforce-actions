@@ -1,7 +1,7 @@
 #!/bin/bash
 
 npm install
-
+SFDX_PLUGINS=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins[]')
 pushd .
 cd ~/.config && mkdir sfdx && cd ./sfdx
 echo '["@rdietrick/sfdx-profile-decompose", "@jayree/sfdx-plugin-prettier"]' > unsignedPluginAllowList.json
