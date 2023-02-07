@@ -43,41 +43,21 @@ jobs:
             echo ::set-output name=IS_RELEASE::true
           fi
 
-      - name: Install Salesforce CLI
+      - name: Install profile decompose sfdx plugin
         if: steps.requires-deploy.outputs.changed == '1'
-        run: |
-          npm install sfdx-cli
-          node_modules/sfdx-cli/bin/run --version
-          node_modules/sfdx-cli/bin/run plugins --core
-
-      - name: Checkout plugin
-        if: steps.requires-deploy.outputs.changed == '1'
-        uses: actions/checkout@885641592076c27bfb56c028cd5612cdad63e16d
-        with:
-          repository: github/sfdx-profile-decompose
-          path: sfdx-profile-decompose
-          token: ${{ secrets.PLUGIN_CHECKOUT_TOKEN }}
-          ref: v1.1
-
-      - name: Install custom sfdx plugins
-        if: steps.requires-deploy.outputs.changed == '1'
-        run: |
-          cd sfdx-profile-decompose
-          npm install
-          cd ../
-          node_modules/sfdx-cli/bin/run plugins:link sfdx-profile-decompose
+        run: echo y | npx sfdx-cli plugins:install @rdietrick/sfdx-profile-decompose
 
       - name: Authenticate DevHub
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
           echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
-          sudo node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
-          sudo node_modules/sfdx-cli/bin/run force:org:display --json -u DevHub > sfdx-auth.json
+          npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
+          npx sfdx-cli force:org:display --json -u DevHub > sfdx-auth.json
 
       - name: Recompose profiles
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
-          npx sfdx profiles:aggregate
+          npx sfdx-cli profiles:aggregate
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
 
       - name: Generate Destructive Changes Param
@@ -98,8 +78,8 @@ jobs:
       - name: Deploy to Production
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
-          sudo node_modules/sfdx-cli/bin/run force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
-          sudo node_modules/sfdx-cli/bin/run force:source:deploy -u DevHub -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
+          npx sfdx-cli force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
+          npx sfdx-cli force:source:deploy -u DevHub -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
 
       - name: Get Previous Tag
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
@@ -139,37 +119,20 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Comment on shipped issues
-        if: steps.requires-deploy.outputs.changed == '1'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          COMMENT_BODY="The metadata for this issue has been shipped to production. Please do any post-deployment steps and close the issue and delete your sandbox."
-          x=$(<release-notes/release.md)
-          regex='issues\/([0-9]+)'
-          for current_string in ${x[@]}; do
-            if [[ ${current_string} =~ $regex ]]; then
-              ISSUE_URL=https://api.github.com/repos/github/salesforce/issues/${BASH_REMATCH[1]}
-              curl -s -X POST -H 'Content-Type:application/json' -H "Authorization: Bearer ${GITHUB_TOKEN}" -d "{\"body\":\"$COMMENT_BODY\"}" "$ISSUE_URL/comments"
-              curl -s -X POST -H 'Contect-Type:application/json' -H "Authorization: Bearer ${GITHUB_TOKEN}" -d "{\"labels\":[\"In Production\"]}" "$ISSUE_URL/labels"
-            fi
-          done
-
       - name: Authenticate Template sandbox
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
           echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > template-server.key
-          sudo node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwtkeyfile template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} -a Template --instanceurl https://test.salesforce.com
-          sudo node_modules/sfdx-cli/bin/run force:org:display --json -u Template > sfdx-auth.json
+          npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwtkeyfile template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} -a Template --instanceurl https://test.salesforce.com
+          npx sfdx-cli force:org:display --json -u Template > sfdx-auth.json
         env:
           SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}
 
-      - name: update Template sandbox
+      - name: Update Template sandbox
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
-          sudo node_modules/sfdx-cli/bin/run force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
-          sudo node_modules/sfdx-cli/bin/run force:source:deploy -u Template -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
-          sudo node ./node-scripts/org-js-init.js -f sfdx-auth.json
+          npx sfdx-cli force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
+          npx sfdx-cli force:source:deploy -u Template -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
 
       - name: Create PR with cleaned up destructive changes
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
