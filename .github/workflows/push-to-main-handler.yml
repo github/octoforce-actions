@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@885641592076c27bfb56c028cd5612cdad63e16d
         with:
           fetch-depth: 0
-          token: ${{ secrets.BOT_USER_SCOPED_PAT }}
+          token: ${{ secrets.SCOPED_PAT }}
 
       - name: Checkout tags
         run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
