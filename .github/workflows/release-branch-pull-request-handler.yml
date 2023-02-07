@@ -14,7 +14,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3.5.1
         with:
-          node-version: "14"
+          node-version-file: ".nvmrc"
       - name: Cache Node Modules
         uses: actions/cache@v3.0.11
         id: npm_cache_id
@@ -36,15 +36,12 @@ jobs:
       - name: Install sfdx Plugins
         if: steps.branchFilter.outputs.matches == 'true'
         run: |
-          pushd .
-          cd ~/.config && mkdir sfdx && cd ./sfdx
-          echo '["sfdx-deliverability-access","@rdietrick/sfdx-profile-decompose"]' > unsignedPluginAllowList.json
-          popd
-          npx sfdx plugins:install sfdx-deliverability-access @rdietrick/sfdx-profile-decompose
+          echo y | npx sfdx-cli plugins:install sfdx-deliverability-access
+          echo y | npx sfdx-cli plugins:install @rdietrick/sfdx-profile-decompose
       - name: Recompose Profiles
         if: steps.branchFilter.outputs.matches == 'true' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
         run: |
-          npx sfdx profiles:aggregate
+          npx sfdx-cli profiles:aggregate
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
       - name: Check First Deploy
         if: vars.GENERATE_RELEASE == 'true' && steps.branchFilter.outputs.matches == 'true'
@@ -74,18 +71,18 @@ jobs:
           LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
         run: |
           openssl enc -d -aes-256-cbc -in ${LOGIN_ENC_FILE}.enc -out ${LOGIN_ENC_FILE} -k ${{ secrets.SANDBOX_URL_ENCRYPTION_KEY }} -md sha256
-          npx sfdx force:auth:sfdxurl:store -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
+          npx sfdx-cli force:auth:sfdxurl:store -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
       - name: Set Email Deliverability Access Level to All Email
         if: steps.branchFilter.outputs.matches == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
         run: |
-          npx sfdx deliverability:access --level All -u is${{ steps.branchFilter.outputs.issueNumber }}uat
+          npx sfdx-cli deliverability:access --level All -u is${{ steps.branchFilter.outputs.issueNumber }}uat
       - name: Deploy Source to Sandbox
         if: steps.branchFilter.outputs.matches == 'true'
         env:
           LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
         run: |
-          npx sfdx force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
-          npx sfdx force:source:deploy -u is${{ steps.branchFilter.outputs.issueNumber }}uat -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w ${{ vars.DEPLOYMENT_TIMEOUT }} -l RunLocalTests
+          npx sfdx-cli force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
+          npx sfdx-cli force:source:deploy -u is${{ steps.branchFilter.outputs.issueNumber }}uat -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w ${{ vars.DEPLOYMENT_TIMEOUT }} -l RunLocalTests
       - name: Init Release Notes
         id: init-release-notes
         if: vars.GENERATE_RELEASE == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
