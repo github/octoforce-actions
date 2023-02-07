@@ -55,7 +55,7 @@ jobs:
           npx sfdx-cli force:org:display --json -u DevHub > sfdx-auth.json
 
       - name: Recompose profiles
-        if: steps.requires-deploy.outputs.changed == '1'
+        if: steps.requires-deploy.outputs.changed == '1' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
         run: |
           npx sfdx-cli profiles:aggregate
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
@@ -137,7 +137,7 @@ jobs:
       - name: Create PR with cleaned up destructive changes
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
         env:
-          PAT: ${{ secrets.BOT_USER_SCOPED_PAT }}
+          PAT: ${{ secrets.SCOPED_PAT }}
           USER_EMAIL: ${{ secrets.BOT_USER_EMAIL }}
           USER_NAME: ${{ secrets.BOT_USER_NAME }}
         run: |
