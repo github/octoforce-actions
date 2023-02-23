@@ -39,3 +39,5 @@ The following repository variables are required to be set in the repository sett
   - This is feature flag that is a boolean value that determines whether release notes should be generated.
 - `SALESFORCE_FORMATTED_PROFILES_AND_PERMS`
   - This is a feature flag that is a boolean value that determines whether profiles and permissions should be formatted using the `profile:decompose` plugin.
+- `DEPLOYMENT_TIMEOUT`
+  - The number of minutes to wait for the `force:source:deploy` command to complete and display results.
