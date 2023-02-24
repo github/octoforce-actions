@@ -18,8 +18,6 @@ The following secrets are required to be set in the repository settings:
   - This is the consumer key of the template org. This is used to authenticate with the template sandbox.
 - `SALESFORCE_TEMPLATE_USERNAME`
   - This is the username of the template org. This is used to authenticate with the template sandbox.
-- `SALESFORCE_TEMPLATE_USERNAME`
-  - This is the username of the template org. This is used to authenticate with the template sandbox.
 - `SALESFORCE_TEMPLATE_JWT_SECRET_KEY`
   - This is the private key used to generate the JWT token. This is used to authenticate with the template sandbox.
 - `BOT_USER_EMAIL`
@@ -41,3 +39,5 @@ The following repository variables are required to be set in the repository sett
   - This is feature flag that is a boolean value that determines whether release notes should be generated.
 - `SALESFORCE_FORMATTED_PROFILES_AND_PERMS`
   - This is a feature flag that is a boolean value that determines whether profiles and permissions should be formatted using the `profile:decompose` plugin.
+- `DEPLOYMENT_TIMEOUT`
+  - The number of minutes to wait for the `force:source:deploy` command to complete and display results.
