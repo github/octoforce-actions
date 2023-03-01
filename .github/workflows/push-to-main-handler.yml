@@ -49,6 +49,8 @@ jobs:
 
       - name: Authenticate DevHub
         if: steps.requires-deploy.outputs.changed == '1'
+        env:
+          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
         run: |
           echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
           npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
