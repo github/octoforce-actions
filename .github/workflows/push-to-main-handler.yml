@@ -53,7 +53,7 @@ jobs:
           SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
         run: |
           echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
-          npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
+          npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
           npx sfdx-cli force:org:display --json -u DevHub > sfdx-auth.json
 
       - name: Recompose profiles
