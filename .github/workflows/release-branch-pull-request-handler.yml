@@ -88,7 +88,7 @@ jobs:
         if: vars.GENERATE_RELEASE == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.SCOPED_PAT }}
-          ISSUE_URL: https://api.github.com/repos/github/salesforce/issues/${{ steps.branchFilter.outputs.issueNumber }}
+          ISSUE_URL: https://api.github.com/repos/${github.repository}/issues/${{ steps.branchFilter.outputs.issueNumber }}
         run: |
           git fetch origin ${{ github.head_ref }}
           curl -H "Authorization: Bearer ${GITHUB_TOKEN}" -s ${ISSUE_URL} > issue.json
