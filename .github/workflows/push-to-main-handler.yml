@@ -156,6 +156,5 @@ jobs:
 
             gh pr create --title "Clean up destructive changes" \
             --body "Please merge \`clean-up-destructive-changes-$RELEASE_DATE\` into \`main\` and delete \`clean-up-destructive-changes-$RELEASE_DATE\`." \
-            -H clean-up-destructive-changes-"$RELEASE_DATE" -B main \
-            -r github/salesforce-reviewers
+            -H clean-up-destructive-changes-"$RELEASE_DATE" -B main
           fi
