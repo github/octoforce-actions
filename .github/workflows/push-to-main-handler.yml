@@ -85,7 +85,7 @@ jobs:
         id: previous_tag
         uses: WyriHaximus/github-action-get-previous-tag@b95747caec0c7a37825ed29640b4adcb6a8cd3fb
         with:
-          fallback: 0.0.0
+          fallback: 1.0.0
           prefix: v
         env:
           GITHUB_TOKEN: ${{ secrets.SCOPED_PAT }}
