@@ -15,9 +15,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.SCOPED_PAT }}
 
-      - name: Checkout tags
-        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-
       - name: Setup Node
         uses: actions/setup-node@377c6dae4006fcd73be5aac564ee449b1a5d63f7
         with:
@@ -86,7 +83,10 @@ jobs:
       - name: Get Previous Tag
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
         id: previous_tag
-        uses: WyriHaximus/github-action-get-previous-tag@3f018b4126e1d6652bcb11a64cb505e341b70c2d
+        uses: WyriHaximus/github-action-get-previous-tag@b95747caec0c7a37825ed29640b4adcb6a8cd3fb
+        with:
+          fallback: 0.0.0
+          prefix: v
         env:
           GITHUB_TOKEN: ${{ secrets.SCOPED_PAT }}
 
