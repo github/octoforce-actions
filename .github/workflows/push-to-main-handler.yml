@@ -104,10 +104,6 @@ jobs:
           TODAYS_DATE=$(date +'%b %d, %Y')
           echo ::set-output name=RELEASE_DATE::$TODAYS_DATE
 
-      - name: Tag Main
-        if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
-        run: git tag ${{ steps.current_tag.outputs.v_minor }}
-
       - name: Create Release
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
         id: create_release
