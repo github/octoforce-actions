@@ -21,10 +21,10 @@ else
 fi
 
 echo
-if [[ ! -f .env ]]
+
+if [[ ! -f auth/public-key.txt ]]
 then
-    printf "\nERROR: .env not found in root of project.  .enc file not generated\n"
-    echo "Add a valid .env file to the root of your project and re-run the sandbox_auth script to generate a UAT login file."
+    printf "\nERROR: auth/public-key.txt not found\n"
     exit 1
 fi
 
@@ -42,12 +42,11 @@ else
     wait $PID
 fi
 
-echo "===> Generating encrypted login URL ... "
-source .env
+echo "===> Generating encrypted sfdx auth URL file... "
 ORG_INFO="$(sfdx force:org:display -u $UAT_ALIAS --verbose 2>/dev/null)"
 LOGIN_URL=$(echo "$ORG_INFO" | awk -F "Sfdx Auth Url" '{print $2}' | xargs)
 LOGIN_URL_FILE=auth/sandbox-login-url-${BRANCH_NAME}-uat.txt
 echo ${LOGIN_URL} > ${LOGIN_URL_FILE}
-openssl enc -aes-256-cbc -k "${SANDBOX_URL_ENCRYPTION_KEY}" -in ${LOGIN_URL_FILE} -out ${LOGIN_URL_FILE}.enc -md sha256
-git add ${LOGIN_URL_FILE}.enc
-echo -e "Encrypted login URL has been staged and stored in: ${GREEN}${LOGIN_URL_FILE}.enc${COLOR_RESET}\n"
+cat ${LOGIN_URL_FILE} | age -r $(cat auth/public-key.txt) > ${LOGIN_URL_FILE}.age
+git add ${LOGIN_URL_FILE}.age
+echo -e "Encrypted login URL has been staged and stored in: ${GREEN}${LOGIN_URL_FILE}.age${COLOR_RESET}\n"

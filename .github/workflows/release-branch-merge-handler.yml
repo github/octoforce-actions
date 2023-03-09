@@ -60,4 +60,4 @@ jobs:
         if: steps.check_merge.outputs.IS_MERGE == 'true'
         with:
           branch: ${{ github.ref }}
-          commit_message: Add issue release notes and remove .enc file.
+          commit_message: Compiled issue release notes and removed auth files
