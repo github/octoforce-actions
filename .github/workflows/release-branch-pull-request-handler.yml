@@ -40,7 +40,7 @@ jobs:
         uses: rdietrick/did-files-change@12ed863b722bc28052850c22b28a37f38b6eca8d
         id: requires-deploy
         with:
-          pathspec: force-app
+          pathspec: force-app auth
           sha: ${{ github.event.pull_request.head.sha }}
       - name: Recompose Profiles
         if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
