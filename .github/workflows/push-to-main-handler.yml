@@ -111,7 +111,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SCOPED_PAT }}
         with:
-          tag_name: ${{ steps.current_tag.outputs.v_major }}
+          tag_name: ${{ steps.current_tag.outputs.v_minor }}
           release_name: ${{ steps.get_date.outputs.RELEASE_DATE }} Release
           body_path: release-notes/release.md
           draft: false
