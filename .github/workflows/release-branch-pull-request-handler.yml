@@ -35,7 +35,7 @@ jobs:
           BRANCH_NAME: ${{ github.head_ref }}
           ISSUE_PREFIX: ${{ vars.ISSUE_BRANCH_PREFIX }}
         run: node ./node-scripts/branch-filter.js
-      - name: Did Metadata Change
+      - name: Did Metadata or Auth Files Change
         if: steps.branchFilter.outputs.matches == 'true'
         uses: rdietrick/did-files-change@12ed863b722bc28052850c22b28a37f38b6eca8d
         id: requires-deploy
