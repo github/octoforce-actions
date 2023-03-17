@@ -15,9 +15,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.SCOPED_PAT }}
 
-      - name: Checkout tags
-        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-
       - name: Setup Node
         uses: actions/setup-node@377c6dae4006fcd73be5aac564ee449b1a5d63f7
         with:
@@ -49,9 +46,11 @@ jobs:
 
       - name: Authenticate DevHub
         if: steps.requires-deploy.outputs.changed == '1'
+        env:
+          SALESFORCE_JWT_KEY: ${{ secrets.SALESFORCE_JWT_KEY }}
         run: |
-          echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
-          npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
+          echo "${SALESFORCE_JWT_KEY}" > server.key
+          npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
           npx sfdx-cli force:org:display --json -u DevHub > sfdx-auth.json
 
       - name: Recompose profiles
@@ -84,9 +83,12 @@ jobs:
       - name: Get Previous Tag
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
         id: previous_tag
-        uses: WyriHaximus/github-action-get-previous-tag@3f018b4126e1d6652bcb11a64cb505e341b70c2d
+        uses: WyriHaximus/github-action-get-previous-tag@b95747caec0c7a37825ed29640b4adcb6a8cd3fb
+        with:
+          fallback: 1.0.0
+          prefix: v
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: ${{ secrets.SCOPED_PAT }}
 
       - name: Get Next Tag Version
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
@@ -102,18 +104,14 @@ jobs:
           TODAYS_DATE=$(date +'%b %d, %Y')
           echo ::set-output name=RELEASE_DATE::$TODAYS_DATE
 
-      - name: Tag Main
-        if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
-        run: git tag ${{ steps.current_tag.outputs.v_minor }}
-
       - name: Create Release
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
         id: create_release
         uses: actions/create-release@c38d3a140cc22e67e265c5d5b6b4888d1f02533f
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SCOPED_PAT }}
         with:
-          tag_name: ${{ steps.current_tag.outputs.v_patch }}
+          tag_name: ${{ steps.current_tag.outputs.v_minor }}
           release_name: ${{ steps.get_date.outputs.RELEASE_DATE }} Release
           body_path: release-notes/release.md
           draft: false
@@ -154,6 +152,5 @@ jobs:
 
             gh pr create --title "Clean up destructive changes" \
             --body "Please merge \`clean-up-destructive-changes-$RELEASE_DATE\` into \`main\` and delete \`clean-up-destructive-changes-$RELEASE_DATE\`." \
-            -H clean-up-destructive-changes-"$RELEASE_DATE" -B main \
-            -r github/salesforce-reviewers
+            -H clean-up-destructive-changes-"$RELEASE_DATE" -B main
           fi

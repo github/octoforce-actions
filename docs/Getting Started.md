@@ -8,8 +8,6 @@ The following secrets are required to be set in the repository settings:
   - This is a personal access token with the `repo` scope. This is used to checkout the repository and push any changes.
 - `SALESFORCE_JWT_KEY`
   - This is the private key used to generate the JWT token. This is used to authenticate with Salesforce production.
-- `SALESFORCE_JWT_SECRET_KEY`
-  - This is the private key used to generate the JWT token. This is used to authenticate with Salesforce production.
 - `SALESFORCE_CLIENT_ID`
   - This is the client ID used to generate the JWT token. This is used to authenticate with Salesforce production.
 - `SALESFORCE_DEVHUB_USERNAME`

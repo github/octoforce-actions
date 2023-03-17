@@ -32,7 +32,7 @@ jobs:
       - name: Compile Release Notes
         if: steps.check_merge.outputs.IS_MERGE == 'true' && vars.GENERATE_RELEASE == 'true'
         run: |
-          if [ ls release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md 1> /dev/null 2>&1 ]
+          if [ -f release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md ]
           then
               if [ ! -f release-notes/release.md ]
               then

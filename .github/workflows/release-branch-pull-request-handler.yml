@@ -36,7 +36,6 @@ jobs:
       - name: Install sfdx Plugins
         if: steps.branchFilter.outputs.matches == 'true'
         run: |
-          echo y | npx sfdx-cli plugins:install sfdx-deliverability-access
           echo y | npx sfdx-cli plugins:install @rdietrick/sfdx-profile-decompose
       - name: Recompose Profiles
         if: steps.branchFilter.outputs.matches == 'true' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
@@ -72,10 +71,6 @@ jobs:
         run: |
           openssl enc -d -aes-256-cbc -in ${LOGIN_ENC_FILE}.enc -out ${LOGIN_ENC_FILE} -k ${{ secrets.SANDBOX_URL_ENCRYPTION_KEY }} -md sha256
           npx sfdx-cli force:auth:sfdxurl:store -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
-      - name: Set Email Deliverability Access Level to All Email
-        if: steps.branchFilter.outputs.matches == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
-        run: |
-          npx sfdx-cli deliverability:access --level All -u is${{ steps.branchFilter.outputs.issueNumber }}uat
       - name: Deploy Source to Sandbox
         if: steps.branchFilter.outputs.matches == 'true'
         env:
