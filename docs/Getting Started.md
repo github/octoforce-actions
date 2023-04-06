@@ -1,3 +1,12 @@
+## Setup Guide
+1. Enable DevHub in your production org.
+2. Create a connected app in your production org for the octoforce CI/CD application that will be provisioning sandboxes and deploying to production.
+    - create [private key and cert](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_key_and_cert.htm)
+    - grant appropriate permissions/policies
+3. Create a template sandbox from your production org.  This is the org that will be cloned to create your dev and uat sandboxes.
+4. Upload your digital certificate to your template org's octoforce connected app.
+5. 
+
 ## Required Configurations
 
 ### Secrets
