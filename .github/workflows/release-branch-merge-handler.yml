@@ -1,36 +1,22 @@
 name: Release Branch Merge Handler
 on:
-  push:
-    branches:
+  pull_request:
+    types:
+      - closed
 jobs:
   build:
     name: Clean Up Release Branch
     runs-on: ubuntu-latest
-    if: startsWith(github.event.ref, format('refs/heads/{0}', vars.RELEASE_BRANCH_PREFIX))
+    if: github.event.pull_request.merged == true && startsWith(github.base_ref, vars.RELEASE_BRANCH_PREFIX)
     steps:
       - name: Checkout
         uses: actions/checkout@v2.5.0
         with:
+          ref: ${{ github.base_ref }}
           fetch-depth: 0
           token: ${{ secrets.SCOPED_PAT }}
-      - name: Check for Issue Branch Merged
-        id: check_merge
-        run: |
-          ISSUE_FILES=$(git diff --name-only HEAD^ HEAD -- 'release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md')
-          if [ -z "$ISSUE_FILES" ]
-          then
-            echo "IS_MERGE=false" >> $GITHUB_OUTPUT;
-          else
-            echo "IS_MERGE=true" >> $GITHUB_OUTPUT;
-          fi
-      - name: Export Branch
-        if: steps.check_merge.outputs.IS_MERGE == 'true'
-        id: export-branch
-        run: |
-          BRANCH=$(basename ${{ github.ref }})
-          echo "BRANCH=$BRANCH" >> $GITHUB_OUTPUT;
       - name: Compile Release Notes
-        if: steps.check_merge.outputs.IS_MERGE == 'true' && vars.GENERATE_RELEASE == 'true'
+        if: vars.GENERATE_RELEASE == 'true'
         run: |
           if [ -f release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}*.md ]
           then
@@ -49,7 +35,6 @@ jobs:
               done
           fi
       - name: Delete Artifacts
-        if: steps.check_merge.outputs.IS_MERGE == 'true'
         run: |
           if [ "${{ vars.GENERATE_RELEASE }}" = "true" ]
           then
@@ -57,7 +42,6 @@ jobs:
           fi
           rm auth/sandbox-login-url-issue-* || true
       - uses: stefanzweifel/git-auto-commit-action@v4.15.4
-        if: steps.check_merge.outputs.IS_MERGE == 'true'
         with:
           branch: ${{ github.ref }}
-          commit_message: Add issue release notes and remove .enc file.
+          commit_message: Compiled issue release notes and removed auth files
