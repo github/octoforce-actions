@@ -11,6 +11,8 @@ jobs:
         uses: actions/checkout@v2.5.0
         with:
           token: ${{ secrets.SCOPED_PAT }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
       - name: Setup Node
         uses: actions/setup-node@v3.5.1
         with:
@@ -33,13 +35,17 @@ jobs:
           BRANCH_NAME: ${{ github.head_ref }}
           ISSUE_PREFIX: ${{ vars.ISSUE_BRANCH_PREFIX }}
         run: node ./node-scripts/branch-filter.js
-      - name: Install sfdx Plugins
+      - name: Did Metadata or Auth Files Change
         if: steps.branchFilter.outputs.matches == 'true'
+        uses: rdietrick/did-files-change@12ed863b722bc28052850c22b28a37f38b6eca8d
+        id: requires-deploy
+        with:
+          pathspec: force-app auth
+          sha: ${{ github.event.pull_request.head.sha }}
+      - name: Recompose Profiles
+        if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
         run: |
           echo y | npx sfdx-cli plugins:install @rdietrick/sfdx-profile-decompose
-      - name: Recompose Profiles
-        if: steps.branchFilter.outputs.matches == 'true' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
-        run: |
           npx sfdx-cli profiles:aggregate
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
       - name: Check First Deploy
@@ -51,7 +57,7 @@ jobs:
             echo "FIRST_DEPLOY=false" >> $GITHUB_OUTPUT; else echo "FIRST_DEPLOY=true" >> $GITHUB_OUTPUT;
           fi
       - name: Generate Destructive Changes Param
-        if: steps.branchFilter.outputs.matches == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
+        if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
         id: check_for_destructive_changes
         run: |
           if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
@@ -65,7 +71,7 @@ jobs:
             echo "DESTRUCTIVE_FILES='--postdestructivechanges destructive-changes/destructiveChangesPost.xml'" >> $GITHUB_OUTPUT;
           fi
       - name: Authenticate to UAT Sandbox
-        if: steps.branchFilter.outputs.matches == 'true'
+        if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1'
         env:
           LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
         run: |
@@ -75,7 +81,7 @@ jobs:
           rm key.txt
           npx sfdx-cli force:auth:sfdxurl:store -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
       - name: Deploy Source to Sandbox
-        if: steps.branchFilter.outputs.matches == 'true'
+        if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1'
         env:
           LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
         run: |
@@ -104,5 +110,5 @@ jobs:
         if: vars.GENERATE_RELEASE == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
         with:
           branch: ${{ github.head_ref }}
-          commit_message: Add issue release notes
+          commit_message: Issue release note
           file_pattern: release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}${{ steps.branchFilter.outputs.issueNumber }}.md
