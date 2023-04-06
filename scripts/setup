@@ -22,10 +22,10 @@ then
     brew install gawk
 fi
 
-if ! which openssl  > /dev/null
+if ! which age > /dev/null
 then
-    echo "===> Installing openssl"
-    brew install openssl
+    echo "===> Installing age"
+    brew install age
 fi
 
 if ! which gh  > /dev/null
