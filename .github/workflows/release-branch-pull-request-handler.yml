@@ -74,6 +74,7 @@ jobs:
         if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1'
         env:
           LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
+          SFDX_AUTH_SECRET_KEY: ${{ secrets.SFDX_AUTH_SECRET_KEY }}
         run: |
           sudo apt install age
           echo "$SFDX_AUTH_SECRET_KEY" >> key.txt
