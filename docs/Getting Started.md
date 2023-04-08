@@ -3,9 +3,15 @@
 2. Create a connected app in your production org for the octoforce CI/CD application that will be provisioning sandboxes and deploying to production.
     - create [private key and cert](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_key_and_cert.htm)
     - grant appropriate permissions/policies
-3. Create a template sandbox from your production org.  This is the org that will be cloned to create your dev and uat sandboxes.
-4. Upload your digital certificate to your template org's octoforce connected app.
-5. 
+    - grant the "system administrator" or any other profiles access to the new connected app
+3. Clone your production org to create a sandbox named "template".  This is the org that will be cloned to create your dev and uat sandboxes.
+4. Update the connected app in your template sandbox.
+    - upload your cert (you can use the same one as your production org or generate a new key/cert pair)
+    - grant appropriate permissions/policies
+    - grant the "system administrator" or any other profiles access to the new connected app
+6. Generate age public/private keys and set the SFDX_AUTH_SECRET_KEY secret.
+7. Create a PAT with "repo" scope and store its value as a secret in your repo with the key "SCOPED_PAT"
+8. 
 
 ## Required Configurations
 
