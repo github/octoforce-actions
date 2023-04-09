@@ -11,12 +11,15 @@
     - grant the "system administrator" or any other profiles access to the new connected app
 6. Generate age public/private keys and set the SFDX_AUTH_SECRET_KEY secret.
 7. Create a PAT with "repo" scope and store its value as a secret in your repo with the key "SCOPED_PAT"
-8. Import you Salesforce org's metadata into your repo:
+8. Run the scripts/setup script to install all required plugins.
+9. Import you Salesforce org's metadata into your repo:
     - Create an issue to import your Salesforce metadata into your repo.
     - Create a new branch for your issue, following the issue branch naming convention (e.g., issue-1).
     - If you are using the profiles:decompose plugin, uncomment the following lines in .gitignore 
       - force-app/main/default/profiles/*-meta.xml
       - force-app/main/default/permissionsets/*-meta.xml
+    - retrieve your metadata with `scripts/retrieve -u issue-# -x package.xml`
+    - `git add force-app`; git commit -m "initial metadata import"; git push origin
 
 ## Required Configurations
 
