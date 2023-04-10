@@ -1,0 +1,11 @@
+<!--PLEASE READ: If you override the automatically generated CSS, your Chatter Answers community might not function correctly.-->
+<apex:page standardController="Case">
+  <apex:outputPanel rendered="{!case.origin == 'Chatter Answers'}">
+    <apex:detail /><br />
+    <chatteranswers:singleitemfeed entityId="{!case.id}" />
+  </apex:outputPanel>
+
+  <apex:outputPanel rendered="{!case.origin != 'Chatter Answers'}">
+    <apex:detail />
+  </apex:outputPanel>
+</apex:page>

@@ -1,0 +1,243 @@
+<apex:page>
+  <apex:stylesheet value="/apex/ca_tour_style" />
+  <apex:includeScript value="/support/console/25.0/integration.js" />
+  <script type="text/javascript">
+    /***** Box Currently Showing Variable Controller *****/
+    var boxIsShowing = 0;
+
+    /***** Set Tab Title Below In Single Quotes *****/
+    //sforce.console.getFocusedPrimaryTabId(function(result){
+    //  sforce.console.setTabTitle('Tour Agent Console', result.id);
+    //});
+
+    /***** Function to Move Forward in Tour *****/
+    function tourNext(num) {
+      var nextNum = num + 1;
+      document.getElementById("pop" + num).style.display = "none";
+      document.getElementById("pop" + nextNum).style.display = "block";
+    }
+
+    /***** Function to Move Back in Tour *****/
+    function tourBack(num) {
+      var backNum = num - 1;
+      document.getElementById("pop" + num).style.display = "none";
+      document.getElementById("pop" + backNum).style.display = "block";
+    }
+
+    /***** Box Show Functionality *****/
+    function showTour(num) {
+      hideTour();
+      document.getElementById("pop" + num).style.display = "block";
+      hoverIsOn = 0;
+    }
+
+    /***** Hides All Boxes *****/
+    function hideTour() {
+      for (i = 1; i < 11; i++) {
+        document.getElementById("pop" + i).style.display = "none";
+      }
+    }
+  </script>
+  <body>
+    <div id="container">
+      <div id="content">
+        <!-- All Popup Information Boxes -->
+
+        <!-- Welcome Box -->
+        <div id="pop1" class="popUps" style="">
+          <h3>Welcome&#33;</h3>
+          <p>
+            Welcome to Service Communities, a complete self-service community
+            portal that lets you deliver better web-based service to your
+            customers.
+          </p>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=questions_portal_setup_about.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(1)">Next&nbsp;&#62;&#62;</a>
+          <span class="" title=""></span>
+        </div>
+        <!-- My Profile Box -->
+        <div id="pop2" class="popUps" style="">
+          <h3>My Profile</h3>
+          <p>
+            Your customer’s profile page allows them to view all their open
+            questions in one place, personalize their profile with a picture,
+            and edit their privacy and security settings.
+          </p>
+          <a href="" class="" onclick="tourBack(2)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=questions_portal_about_users.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(2)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">1/9</div>
+          <span class="pointLeft" title=""></span>
+        </div>
+        <!-- Search Bar Box -->
+        <div id="pop3" class="popUps" style="">
+          <h3>Search Bar</h3>
+          <p>
+            Customers use the search bar to ask questions in their own words and
+            receive answers from your knowledge base as well as the community.
+          </p>
+          <a href="" class="" onclick="tourBack(3)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=questions_portal_setup.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(3)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">2/9</div>
+          <span class="pointTop" title=""></span>
+        </div>
+        <!-- Suggested Results Box -->
+        <div id="pop4" class="popUps" style="">
+          <h3>Suggested Results</h3>
+          <p>
+            Before your customer posts a question, we suggest possible solutions
+            to take advantage of the knowledge base and eliminate duplicate
+            questions in the community.
+          </p>
+          <a href="" class="" onclick="tourBack(4)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=questions_portal_setup.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(4)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">3/9</div>
+          <span class="pointTop" title=""></span>
+        </div>
+        <!-- Customer Posts Box -->
+        <div id="pop5" class="popUps" style="">
+          <h3>Customer Posts</h3>
+          <p>
+            When a customer posts a question, other customers can respond with
+            helpful suggestions or information.
+          </p>
+          <a href="" class="" onclick="tourBack(5)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=questions_portal_setup.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(5)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">4/9</div>
+          <span class="pointRight" title=""></span>
+        </div>
+        <!-- Agent Posts Box -->
+        <div id="pop6" class="popUps" style="">
+          <h3>Agent Posts</h3>
+          <p>
+            With tight integration into the Service Cloud console, agents can
+            search through unanswered questions and jump in with solutions so no
+            question goes unanswered.
+          </p>
+          <a href="" class="" onclick="tourBack(6)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=questions_portal_setup.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(6)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">5/9</div>
+          <span class="pointRight" title=""></span>
+        </div>
+        <!-- Best Answers Box -->
+        <div id="pop7" class="popUps" style="">
+          <h3>Best Answers</h3>
+          <p>
+            Customers can mark posts as a 'Best Answer' to indicate their issue
+            was resolved.
+          </p>
+          <a href="" class="" onclick="tourBack(7)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=questions_portal_setup.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(7)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">6/9</div>
+          <span class="pointRight" title=""></span>
+        </div>
+        <!-- Categories Box -->
+        <div id="pop8" class="popUps" style="">
+          <h3>Categories</h3>
+          <p>
+            The community can be categorized into topics so customers can
+            quickly navigate to relevant information.
+          </p>
+          <a href="" class="" onclick="tourBack(8)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=questions_portal_setup.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(8)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">7/9</div>
+          <span class="pointLeftBottom" title=""></span>
+        </div>
+        <!-- Portal Tabs Box -->
+        <div id="pop9" class="popUps" style="">
+          <h3>Portal Tabs</h3>
+          <p>
+            You can also use the Customer Portal if you need to securely share
+            information with your customers, including accounts, cases, orders,
+            opportunities, and ideas.
+          </p>
+          <a href="" class="" onclick="tourBack(9)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=customer_portal_setting_up.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(9)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">8/9</div>
+          <span class="pointTop" title=""></span>
+        </div>
+      </div>
+    </div>
+    <!-- Close tab Box -->
+    <div id="pop10" class="popUps" style="">
+      <h3>That's It!</h3>
+      <p>
+        You’re done exploring the self-service community. Close this tab to
+        return to the Getting Started tab and learn more about the Service
+        Cloud.
+      </p>
+      <a href="" class="" onclick="tourBack(10)">&#60;&#60;&nbsp;Back</a>
+      <div class="tourNum">9/9</div>
+      <span class="pointTop" title=""></span>
+    </div>
+  </body>
+</apex:page>

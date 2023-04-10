@@ -1,0 +1,13 @@
+<apex:page>
+  <apex:includeScript value="/support/console/27.0/integration.js" />
+  <input
+    type="button"
+    value="Tour - 1"
+    onclick="sforce.console.openPrimaryTab(null, '/apex/scc_tour_main', true, 'Service Cloud Console Tour', null, 'Service Cloud Console Tour');return false;"
+  />
+  <input
+    type="button"
+    value="Tour - 2"
+    onclick="sforce.console.openPrimaryTab(null, '/apex/ca_tour_main', true, 'Communities Tour', null, 'Communities Tour');return false;"
+  />
+</apex:page>

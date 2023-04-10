@@ -1,0 +1,259 @@
+<apex:page>
+  <apex:stylesheet value="/apex/scc_tour_style" />
+  <apex:includeScript value="/support/console/25.0/integration.js" />
+  <script type="text/javascript">
+    /***** Box Currently Showing Variable Controller *****/
+    var boxIsShowing = 0;
+
+    /***** Set Tab Title Below In Single Quotes *****/
+    //sforce.console.getFocusedPrimaryTabId(function(result){
+    //  sforce.console.setTabTitle('Tour Agent Console', result.id);
+    //});
+
+    /***** Function to Move Forward in Tour *****/
+    function tourNext(num) {
+      var nextNum = num + 1;
+      document.getElementById("pop" + num).style.display = "none";
+      document.getElementById("pop" + nextNum).style.display = "block";
+    }
+
+    /***** Function to Move Back in Tour *****/
+    function tourBack(num) {
+      var backNum = num - 1;
+      document.getElementById("pop" + num).style.display = "none";
+      document.getElementById("pop" + backNum).style.display = "block";
+    }
+
+    /***** Box Show Functionality *****/
+    function showTour(num) {
+      hideTour();
+      document.getElementById("pop" + num).style.display = "block";
+      hoverIsOn = 0;
+    }
+
+    /***** Hides All Boxes *****/
+    function hideTour() {
+      for (i = 1; i < 11; i++) {
+        document.getElementById("pop" + i).style.display = "none";
+      }
+    }
+  </script>
+  <body>
+    <div id="container">
+      <div id="content">
+        <!-- All Popup Information Boxes -->
+
+        <!-- Welcome Box -->
+        <div id="pop1" class="popUps" style="">
+          <h3>Welcome&#33;</h3>
+          <p>
+            Welcome to the Service Cloud console tour. The console is the
+            agent&#39;s primary case management interface.
+          </p>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=console2_about.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(1)">Next&nbsp;&#62;&#62;</a>
+          <span class="" title=""></span>
+        </div>
+        <!-- Customer Information Box -->
+        <div id="pop2" class="popUps" style="">
+          <h3>Highlight Panel: Customer Information</h3>
+          <p>
+            This is where agents see important customer information. You can
+            customize all the sections in the highlight panel for your business.
+          </p>
+          <a href="" class="" onclick="tourBack(2)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=customize_layoutcustomize_highlights_panel_config.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(2)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">1/10</div>
+          <span class="pointTop" title=""></span>
+        </div>
+        <!-- Case Summary Box -->
+        <div id="pop3" class="popUps" style="">
+          <h3>Highlight Panel: Case Summary</h3>
+          <p>
+            The case summary gives your agents a quick snapshot of what this
+            case is about.
+          </p>
+          <a href="" class="" onclick="tourBack(3)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=customize_layoutcustomize_highlights_panel_config.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(3)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">2/10</div>
+          <span class="pointTop" title=""></span>
+        </div>
+        <!-- Case Status Box -->
+        <div id="pop4" class="popUps" style="">
+          <h3>Highlight Panel: Case Status</h3>
+          <p>
+            The case status lets agents see the case priority and where this
+            case is in the resolution process.
+          </p>
+          <a href="" class="" onclick="tourBack(4)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=customize_layoutcustomize_highlights_panel_config.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(4)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">3/10</div>
+          <span class="pointTopRight" title=""></span>
+        </div>
+        <!-- Knowledge Box -->
+        <div id="pop5" class="popUps" style="">
+          <h3>Knowledge</h3>
+          <p>
+            Knowledge automatically searches for answers to agents’ questions so
+            they can close cases quickly -- no more time wasted looking for
+            answers.
+          </p>
+          <a href="" class="" onclick="tourBack(5)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=knowledge_whatis.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(5)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">4/10</div>
+          <span class="pointRight" title=""></span>
+        </div>
+        <!-- Case Feed Box -->
+        <div id="pop6" class="popUps" style="">
+          <h3>Case Feed</h3>
+          <p>
+            The feed shows the history of this case across channels in an
+            easy-to-view format.
+          </p>
+          <a href="" class="" onclick="tourBack(6)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=case_interaction_overview.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(6)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">5/10</div>
+          <span class="pointLeft" title=""></span>
+        </div>
+        <!-- Case Publisher Box -->
+        <div id="pop7" class="popUps" style="">
+          <h3>Case Publisher</h3>
+          <p>
+            The case publisher gives agents a single place to respond to all
+            cases, whether they were logged through email, by phone, or on the
+            web.
+          </p>
+          <a href="" class="" onclick="tourBack(7)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=case_interaction_overview.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(7)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">6/10</div>
+          <span class="pointTop" title=""></span>
+        </div>
+        <!-- Feed Filters Box -->
+        <div id="pop8" class="popUps" style="">
+          <h3>Feed Filters</h3>
+          <p>
+            The feed filters let agents view specific activities on a case, such
+            as email, call logs, or case notes.
+          </p>
+          <a href="" class="" onclick="tourBack(8)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=case_interaction_overview.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(8)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">7/10</div>
+          <span class="pointLeftBottom" title=""></span>
+        </div>
+        <!-- Publisher Actions Box -->
+        <div id="pop9" class="popUps" style="">
+          <h3>Case Actions</h3>
+          <p>
+            The case action lets agents perform different actions on a case,
+            such as writing an internal note or changing the status.
+          </p>
+          <a href="" class="" onclick="tourBack(9)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=case_interaction_overview.htm&language=en_US"
+            class="midLinks"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(9)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">8/10</div>
+          <span class="pointTop" title=""></span>
+        </div>
+        <!-- Primary Tabs Box -->
+        <div id="pop10" class="popUps" style="">
+          <h3>Primary Tabs</h3>
+          <p>
+            Primary tabs help agents work on multiple cases at the same time.
+            They also supply other important information, such as relevant
+            account and contact details.
+          </p>
+          <a href="" class="" onclick="tourBack(10)">&#60;&#60;&nbsp;Back</a>
+          <span>|</span>
+          <a
+            href="https://help.salesforce.com/apex/HTViewHelpDoc?id=console2_tabs.htm&language=en_US"
+            target="_blank"
+            >Learn More</a
+          >
+          <span>|</span>
+          <a href="" class="" onclick="tourNext(10)">Next&nbsp;&#62;&#62;</a>
+          <div class="tourNum">9/10</div>
+          <span class="pointTop" title=""></span>
+        </div>
+      </div>
+    </div>
+    <!-- Close tab Box -->
+    <div id="pop11" class="popUps" style="">
+      <h3>That's It!</h3>
+      <p>
+        You’re done exploring the agent console. Close this tab to return to the
+        Getting Started tab and learn more about the Service Cloud.
+      </p>
+      <a href="" class="" onclick="tourBack(11)">&#60;&#60;&nbsp;Back</a>
+      <div class="tourNum">10/10</div>
+      <span class="pointTop" title=""></span>
+    </div>
+  </body>
+</apex:page>

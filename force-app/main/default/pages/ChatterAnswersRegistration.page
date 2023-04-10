@@ -1,0 +1,6 @@
+<!--PLEASE READ: If you override the automatically generated CSS, your Chatter Answers community might not function correctly.-->
+<apex:page showHeader="false" sidebar="false">
+  <body>
+    <chatteranswers:registration />
+  </body>
+</apex:page>
