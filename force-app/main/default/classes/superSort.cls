@@ -1,8 +1,7 @@
 public class superSort {
 
     /*This method takes 3 arguments, the List of objects to sort, the field to sort, 
-    and the order, asc or desc
-    */
+    and the order, asc or desc    */
     
     public static void sortList(List<sObject> items, String sortField, String order){
         /*I must give credit where it is due as the sorting algorithm I am using is the 
