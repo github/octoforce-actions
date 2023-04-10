@@ -6,14 +6,6 @@
     </types>
     <types>
         <members>*</members>
-        <name>ApexComponent</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>ApexPage</name>
-    </types>
-    <types>
-        <members>*</members>
         <name>ApexTrigger</name>
     </types>
     <types>
@@ -31,14 +23,6 @@
     <types>
         <members>*</members>
         <name>CustomLabel</name>
-    </types>
-    <types>
-        <name>CustomPermission</name>
-        <members>*</members>
-    </types>
-    <types>
-        <members>*</members>
-        <name>CustomMetadata</name>
     </types>
     <types>
       <name>CustomObject</name>
@@ -69,19 +53,7 @@
     </types>
     <types>
         <members>*</members>
-        <name>HomePageLayout</name>
-    </types>
-    <types>
-        <members>*</members>
         <name>Layout</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>LeadConvertSettings</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>PermissionSet</name>
     </types>
     <types>
         <members>*</members>
@@ -90,14 +62,6 @@
     <types>
         <members>*</members>
         <name>Queue</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>ReportType</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Role</name>
     </types>
     <types>
         <members>AccountType</members>
@@ -123,27 +87,7 @@
     </types>
     <types>
         <members>*</members>
-        <name>AuraDefinitionBundle</name>
-    </types>
-    <types>
-        <members>*</members>
         <name>LightningComponentBundle</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>FlexiPage</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>SharingCriteriaRule</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>SharingOwnerRule</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>SharingTerritoryRule</name>
     </types>
     <types>
         <members>*</members>
