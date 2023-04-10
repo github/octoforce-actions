@@ -1,9 +1,0 @@
-<PermissionSet>
-    <hasActivationRequired>false</hasActivationRequired>
-    <label>Case Feed</label>
-    <license>Salesforce</license>
-    <userPermissions>
-        <enabled>true</enabled>
-        <name>AllowViewKnowledge</name>
-    </userPermissions>
-</PermissionSet>
