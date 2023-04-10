@@ -8,6 +8,7 @@ const github = require("@actions/github");
     if (!ref) {
       ref = github.context.ref;
     }
+    console.log("yo");
     const branchName = ref.substring(ref.lastIndexOf("/") + 1);
     console.log(`branchName = ${branchName}`);
     core.setOutput("branchName", branchName);
