@@ -10,3 +10,6 @@ package.xml
 
 # LWC Jest
 **/__tests__/**
+
+# Old Chatter VF pages
+force-app/main/default/pages/Chatter*.*
