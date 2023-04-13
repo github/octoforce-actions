@@ -1,0 +1,7 @@
+#!/bin/sh
+# wrapper for sfdx force:source:retrieve that runs our profile splitter after retrieval
+
+set -e
+
+sfdx force:source:retrieve $@
+sfdx profiles:decompose

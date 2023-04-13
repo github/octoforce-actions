@@ -1,5 +1,5 @@
 {
-  "name": "octoforce-actions",
+  "name": "rdietrick-dod-demo",
   "private": true,
   "version": "1.0.0",
   "description": "A lightweight open-source Salesforce CI/CD framework built on the GitHub platform.",
@@ -12,7 +12,6 @@
     "test:unit:coverage": "sfdx-lwc-jest --coverage",
     "prettier": "prettier --write \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
     "prettier:verify": "prettier --list-different \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
-    "postinstall": "husky install",
     "precommit": "lint-staged"
   },
   "devDependencies": {
@@ -28,7 +27,6 @@
     "eslint": "^8.11.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-jest": "^26.1.2",
-    "husky": "^7.0.4",
     "lint-staged": "^12.5.0",
     "prettier": "^2.7.1",
     "prettier-plugin-apex": "^1.11.0",
