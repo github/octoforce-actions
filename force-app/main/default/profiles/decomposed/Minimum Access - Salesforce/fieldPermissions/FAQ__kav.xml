@@ -1,0 +1,12 @@
+<Profile>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>FAQ__kav.Answer__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>FAQ__kav.Question__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+</Profile>

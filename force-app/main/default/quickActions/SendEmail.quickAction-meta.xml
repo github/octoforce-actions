@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<QuickAction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <optionsCreateFeedItem>true</optionsCreateFeedItem>
+    <quickActionLayout>
+        <layoutSectionStyle>TwoColumnsLeftToRight</layoutSectionStyle>
+        <quickActionLayoutColumns />
+        <quickActionLayoutColumns />
+    </quickActionLayout>
+    <standardLabel>SendEmail</standardLabel>
+    <targetObject>OutgoingEmail</targetObject>
+    <type>SendEmail</type>
+</QuickAction>
