@@ -2,36 +2,37 @@
 1. [Create a new repository](https://github.com/new?owner=&template_name=octoforce-actions&template_owner=github) from this repo.  Check out your new repo locally.
 2. If you haven't already, [enable DevHub](https://help.salesforce.com/s/articleView?id=sf.sfdx_setup_enable_devhub.htm&type=5) in your production Salesforce org.  Workflows in octoforce-actions will use your org's DevHub to provisioning development and test sandboxes for your project.
 3. Create (or repurpose an existing) an admin user in your production org that will be used for deployments and sandbox provisioning.
-4. Create a connected app in your production Salesforce org for the octoforce CI/CD application that will be provisioning sandboxes and deploying to production.
-    - create a [private key and certificate for your app](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_key_and_cert.htm)
+4. create a [private key and certificate for use in the app you'll create in the next step](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_key_and_cert.htm)
+5. Create a connected app in your production Salesforce org for the octoforce CI/CD application that will be provisioning sandboxes and deploying to production.
+    - Name your app 'octoforce' or something similar.
     - Set the `Permitted Users` field to "Admin approved users are pre-authorized"
     - Relax IP restrictions
     - Check the "Enable OAuth Settings" field and grant the app the following permissions:
       -  Perform requests at any time
       -  Manage user data via APIs
     - For the Callback URL field, enter https://localhost
-    - Grant the "system administrator" or whichever profile the user that will be  access to the new connected app
-5. Clone your production org to create a sandbox named "template".  This is the org that will be cloned to create your dev and uat sandboxes.
-6. Update the connected app in your template sandbox.
-    - upload your cert (you can use the same one as your production org or generate a new key/cert pair)
-    - grant appropriate permissions/policies
-    - grant the "system administrator" profile (or whichever profile the admin user created in step 3 has) access to the new connected app
-7. [Follow these directions](https://github.com/github/octoforce-actions/blob/add-setup-docs/docs/SFDX%20Auth%20URLs%20%26%20Encryption.md) for the AGE key setup.
-8. Create a PAT with "repo" scope and store its value as a secret in your repo with the key "SCOPED_PAT"
-9. In your local copy of your new repo, run the `scripts/setup` script to install all required plugins.
-10. Import your Salesforce org's metadata into your repo:
+    - Grant the "system administrator" profile (or whichever profile the user designated in step 3 is assigned) access to the new connected app
+6. Clone your production org to create a sandbox named "template".  This is the org that will be cloned to create your dev and uat sandboxes.
+7. When your newly created template sandbox is provisioned, configure it identically to how you did in step 5 above.  You can use the same certificate and key pair or generate new ones. 
+8. [Follow these directions](https://github.com/github/octoforce-actions/blob/add-setup-docs/docs/SFDX%20Auth%20URLs%20%26%20Encryption.md) for the AGE key setup. 
+9. Create a GitHub PAT with "repo" scope and store its value as a secret in your repo with the key `SCOPED_PAT`.
+10. Configure the repository variables listed at the bottom of this document to your liking.
+11. Create a release branch in line with the release branch naming strategy you've decided upon.
+12. In your local copy of your new repo, run the `scripts/setup` script to install all required plugins.
+13. Import your Salesforce org's metadata into your repo:
     - Create an issue to import your Salesforce metadata into your repo.
-    - Create a new branch for your issue, following the issue branch naming convention (e.g., issue-1).  **Wait for your dev and uat sandboxes to be fully provisioned before proceeding.**
-    - Check out your new issue branch locally and run the `scripts/sandbox_auth` script.  You will be asked to log into your newly created dev and uat sandboxes.
+    - Create a new branch for your issue, following the issue branch naming convention (e.g., issue-1 for your repo).  **Wait for your dev and uat sandboxes to be fully provisioned before proceeding.**
+    - Check out your new issue branch locally and run the `scripts/sandbox_auth` script.  You will be prompted to log into your newly created dev and uat sandboxes.
     - Commit the newly created `.age` file to your repo.
-    - If you are using the `profiles:decompose` plugin, you will need to:
+    - If you are are tracking profiles and/or permissionsets in your repo and whish to use the `profiles:decompose` plugin, you will need to:
       - Uncomment the following lines in .gitignore 
         - force-app/main/default/profiles/*-meta.xml
         - force-app/main/default/permissionsets/*-meta.xml
       - Run the following command: `mkdir -p force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed`
     - Adjust your package.xml file accordingly, so that it includes all of the metadata types you wish to store in your project.
     - Retrieve your metadata with `scripts/retrieve -u issue-# -x package.xml`
-    - `git add force-app`; git commit -m "initial metadata import"; git push origin
+    - Add your org's metadata to your repo with: `git add force-app`; git commit -m "initial metadata import"; git push origin
+    - Open a pull request for your issue branch against your release branch.  A workflow will attempt to deploy your PR to the UAT org for your issue.  You may need to refine your package.xml and .forceignore files and re-retrieve your org's metadata to get your deployment to pass.
 
 ## Required Configurations
 
@@ -59,17 +60,18 @@ The following secrets are required to be set in the repository settings:
   - This is the name of the bot user. This is used to create pull requests against the main branch.
 - `SFDX_AUTH_SECRET_KEY`
   - This is the age private key used to encrypt sfdx auth URLs. The encrypted sfdx auth URLs are required to deploy pull requests to UAT sandboxes and are generated by running `scripts/sandbox_auth`. Please see [SFDX Auth URLs & Encryption.md](SFDX%20Auth%20URLs%20%26%20Encryption.md) for more information.
+
 ### Repository Variables
 
 The following repository variables are required to be set in the repository settings:
 
 - `ISSUE_BRANCH_PREFIX`
-  - This is the prefix used for the issue branch. This is used to identify branches that require a sandbox.
+  - This is the prefix used for issue branches.  This is used to identify branches that require a sandbox.
 - `RELEASE_BRANCH_PREFIX`
   - This is the prefix used for the release branch. This is used to identify branches where pull requests should be deployed to test sandbox.
 - `GENERATE_RELEASE`
   - This is feature flag that is a boolean value that determines whether release notes should be generated.
 - `SALESFORCE_FORMATTED_PROFILES_AND_PERMS`
-  - This is a feature flag that is a boolean value that determines whether profiles and permissions should be formatted using the `profile:decompose` plugin.
+  - This is a feature flag that is a boolean value that determines whether profiles and permissions should be formatted using the `profile:decompose` plugin.  
 - `DEPLOYMENT_TIMEOUT`
   - The number of minutes to wait for the `force:source:deploy` command to complete and display results.
