@@ -15,6 +15,8 @@ If enabled in this project, an sfdx plugin can translate monolithic Salesforce p
 
 ### Setup
 
+These step-by-step instructions will walk you through your initial project setup.  At the end of this process, you should have a fully functioning deploy chain from UAT to production to template and your repo will contain all of the Salesforce metadata you wish to track in version control.
+
 1. [Create a new repository](https://github.com/new?owner=&template_name=octoforce-actions&template_owner=github) from this repo.  Check out your new repo locally.
 2. If you haven't already, [enable DevHub](https://help.salesforce.com/s/articleView?id=sf.sfdx_setup_enable_devhub.htm&type=5) in your production Salesforce org.  Workflows in this repo will use your org's DevHub to provision development and test sandboxes for your project.
 3. Create (or repurpose an existing) an admin user in your production org that will be used for deployments and sandbox provisioning.
