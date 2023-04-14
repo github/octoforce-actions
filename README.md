@@ -28,7 +28,7 @@ NodeJS 14.x is the minimum requirement for this project. More recent versions of
 The setup scripts require MacOS to run locally, however is not required to make use of this template.
 The sandbox authentication script requires `SFDX` to be installed and configured and requires a bash environment.
 
-These actions rely on several repository secrets and variables to be set in the repository settings. Please refer to the [Required Configurations](./docs/Getting%20Started.md) section of our getting started doc for more details.
+These actions rely on several repository secrets and variables to be set in the repository settings. Please refer to the [Required Configurations](./docs/Getting%20Started.md#required-configurations) section of our getting started doc for more details.
 
 ## Getting Started
 
