@@ -50,7 +50,6 @@ If enabled in this project, an sfdx plugin can translate monolithic Salesforce p
     - Add your org's metadata to your repo with: `git add force-app`; git commit -m "initial metadata import"; git push origin
     - Open a pull request for your issue branch against your release branch.  A workflow will attempt to deploy your PR to the UAT org for your issue.  You may need to refine your package.xml and .forceignore files and re-retrieve your org's metadata to get your deployment to pass.
 
----
 
 ## Required Configurations
 
