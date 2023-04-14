@@ -13,6 +13,9 @@ The workflows in this repo execute only on branches whose names match certain us
 #### Profile and permissionset format
 If enabled in this project, an sfdx plugin can translate monolithic Salesforce profiles and permissionsets into more granular XML files in your project.  We've found that this makes managing diffs and conflict resolution in these files much easier.  When the plugin is enabled, each profile will, for instance, be broken down into separate files for each object that the profile maintains FLS for.  By default, this plugin is turned on.  To turn it off, set the repository variable `SALESFORCE_FORMATTED_PROFILES_AND_PERMS` to true.  You will also need to remove or comment out the line in `scripts/retrieve` that executes the profiles:decompose plugin.  If you choose to store only profiles or only permissionsets in your repo but wish to use this plugin, you'll need to pass the `--md-types=profiles` or `--md-types=permissionsets` argument to the profiles:decompose command in the retrieve script.
 
+#### Release tracking
+If enabled, each time a release branch is merged to your main branch, a release will be created in your repo with release notes for each issue included in the release.  To turn this on, set the repository variable `GENERATE_RELEASE` to "true."
+
 ### Setup
 
 These step-by-step instructions will walk you through your initial project setup.  At the end of this process, you should have a fully functioning deploy chain from UAT to production to template and your repo will contain all of the Salesforce metadata you wish to track in version control.
@@ -90,7 +93,7 @@ The following repository variables are required to be set in the repository sett
 - `RELEASE_BRANCH_PREFIX`
   - This is the prefix used for the release branch. This is used to identify branches where pull requests should be deployed to test sandbox.
 - `GENERATE_RELEASE`
-  - This is feature flag that is a boolean value that determines whether release notes should be generated.
+  - This is a boolean feature flag that determines whether release notes should be generated.
 - `SALESFORCE_FORMATTED_PROFILES_AND_PERMS`
   - This is a feature flag that is a boolean value that determines whether profiles and permissions should be formatted using the `profile:decompose` plugin.  
 - `DEPLOYMENT_TIMEOUT`
