@@ -20,7 +20,7 @@ A lightweight open-source template Salesforce CI/CD built on the [`GitHub` actio
 
 ## Background
 
-This project is meant to be helpful guide and starting point for Salesforce developers who want to automate their CI/CD process using GitHub Actions. It is not meant to be a complete solution for all Salesforce development teams.
+This project is meant to be a starting point for Salesforce developers who want to automate their CI/CD process using GitHub Actions. It is not meant to be a complete solution for all Salesforce development teams.
 
 ## Requirements
 
