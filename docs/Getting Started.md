@@ -49,7 +49,7 @@ If enabled in this project, an sfdx plugin can translate monolithic Salesforce p
     - Retrieve your metadata with `scripts/retrieve -u issue-# -x package.xml` (replacing "issue-#" with the correct issue branch prefix and issue number)
     - Add your org's metadata to your repo with: `git add force-app`; git commit -m "initial metadata import"; git push origin
     - Open a pull request for your issue branch against your release branch.  A workflow will attempt to deploy your PR to the UAT org for your issue.  You may need to refine your package.xml and .forceignore files and re-retrieve your org's metadata to get your deployment to pass.
-14. Once your UAT deployment passes, you can merge the pull request created above, and create and merge a new pull request that merges your release branch to your main branch.
+14. Once your UAT deployment passes, you can merge the pull request created above, and create and merge a new pull request that merges your release branch to your main branch.  This will deploy your metadata to your production org.
 
 
 ## Required Configurations
