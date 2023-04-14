@@ -16,6 +16,7 @@ A lightweight open-source template Salesforce CI/CD built on the [`GitHub` actio
 ### Limitations
 
 - Setup script does not support Windows.
+- The number of dev sandboxes you are entitled to will determine how many issues your team can work on simultaneously.
 
 ## Background
 
@@ -28,6 +29,10 @@ The setup scripts require MacOS to run locally, however is not required to make 
 The sandbox authentication script requires `SFDX` to be installed and configured and requires a bash environment.
 
 These actions rely on several repository secrets and variables to be set in the repository settings. Please refer to the [Required Configurations](./docs/Getting%20Started.md) section of our getting started doc for more details.
+
+## Getting Started
+
+See the [setuo guide](docs/Getting%20Started.md).
 
 ## License
 
