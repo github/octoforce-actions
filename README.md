@@ -30,6 +30,8 @@ The sandbox authentication script requires `SFDX` to be installed and configured
 
 These actions rely on several repository secrets and variables to be set in the repository settings. Please refer to the [Required Configurations](./docs/Getting%20Started.md#required-configurations) section of our getting started doc for more details.
 
+Your team will be required to follow the dev flow outlined [here](docs/Dev_Flow.md) in order for the workflows in this repo to function as expected.
+
 ## Getting Started
 
 See the [setup guide](docs/Getting%20Started.md).
