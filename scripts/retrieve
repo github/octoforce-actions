@@ -4,4 +4,5 @@
 set -e
 
 sfdx force:source:retrieve $@
-sfdx profiles:decompose --md-types=profiles
+# pass the following command either --md-types=profiles or --md-types=permissionsets if you wish to store only one of these metadata types in your project.
+sfdx profiles:decompose 
