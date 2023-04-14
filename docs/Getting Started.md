@@ -1,4 +1,20 @@
 ## Setup Guide
+
+### Preliminary decisions
+Before you begin setting up your new project, you'll need to make a few important decisions about how you use this project.
+
+#### Branch naming conventions
+The workflows in this repo execute only upon branches whose names match certain patterns.  For example, when issue branches are created, dev and UAT sandboxes will be created.  And when pull requests are opened against a release branch, the pull request will be deployed to a UAT org.  Therefore, you'll need to decide upon the prefixes that those workflows will use to identify issue and release branches.  Once you've decided on your naming conventions, you'll need to set repository variables to store the issue prefixes.  If you're unsure what values to use, we recommend the following:
+| Branch type | Prefix | Repo variable name |
+| ----------- | ------ | ------------------ |
+| Issue       | issue- | ISSUE_BRANCH_PREFIX |
+| Release     | REL-   | RELEASE_BRANCH_PREFIX |
+
+#### Profile and permissionset format
+If enabled, a plugin can translate monolitic Salesforce profiles and permissionsets into more granular XML files in your project.  We've found that this makes managing diffs and conflict resolution in these files much easier.  When the plugin is enabled, each profile will, for instance, be broken down into separate files for each object that the profile maintains FLS for.  By default, this plugin is turned on.  To turn it off, set the repository variable `SALESFORCE_FORMATTED_PROFILES_AND_PERMS` to true.  You will also need to remove or comment out the line in `scripts/retrieve` that executes the profiles:decompose plugin.  If you choose to store only profiles or only permissionsets in your repo but wish to use this plugin, you'll need to pass the `--md-types=profiles` or --md-types=permissionsets` argument to the profiles:decompose command in the retrieve script.
+
+### Setup
+
 1. [Create a new repository](https://github.com/new?owner=&template_name=octoforce-actions&template_owner=github) from this repo.  Check out your new repo locally.
 2. If you haven't already, [enable DevHub](https://help.salesforce.com/s/articleView?id=sf.sfdx_setup_enable_devhub.htm&type=5) in your production Salesforce org.  Workflows in octoforce-actions will use your org's DevHub to provisioning development and test sandboxes for your project.
 3. Create (or repurpose an existing) an admin user in your production org that will be used for deployments and sandbox provisioning.
