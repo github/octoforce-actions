@@ -32,7 +32,7 @@ These actions rely on several repository secrets and variables to be set in the 
 
 ## Getting Started
 
-See the [setuo guide](docs/Getting%20Started.md).
+See the [setup guide](docs/Getting%20Started.md).
 
 ## License
 
