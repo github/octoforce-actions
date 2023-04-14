@@ -56,6 +56,8 @@ These step-by-step instructions will walk you through your initial project setup
     - Open a pull request for your issue branch against your release branch.  A workflow will attempt to deploy your PR to the UAT org for your issue.  You may need to refine your package.xml and .forceignore files and re-retrieve your org's metadata to get your deployment to pass.
 14. Once your UAT deployment passes, you can merge the pull request created above and create and merge a new pull request that merges your release branch to your main branch.  This will deploy your metadata to your production org.
 
+Consult the [dev flow](./Dev_Flow.md) documentation to learn how your team should use this project once it has been set up.
+
 
 ## Required Configurations
 
