@@ -11,7 +11,7 @@ A lightweight open-source template Salesforce CI/CD built on the [`GitHub` actio
 - Support for including desctructive changes in deployments.
 - Script to authenticate against sandboxes using `SFDX` and encrypt the credentials for use in GitHub Actions.
 - Setup script for MacOS to setup `SFDX` and `NodeJS` as well other development dependencies.
-- Basic Docker for configuration for use in [`Codespaces`](https://github.com/features/codespaces).
+- Basic Docker configuration for use in [`Codespaces`](https://github.com/features/codespaces).
 
 ### Limitations
 
