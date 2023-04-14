@@ -40,7 +40,7 @@ If enabled in this project, an sfdx plugin can translate monolithic Salesforce p
     - Create a new branch for your issue, following the issue branch naming convention (e.g., issue-1 for your repo).  **Wait for your dev and uat sandboxes to be fully provisioned before proceeding.**
     - Check out your new issue branch locally and run the `scripts/sandbox_auth` script.  You will be prompted to log into your newly created dev and uat sandboxes.
     - Commit the newly created `.age` file to your repo.
-    - If you are are tracking profiles and/or permissionsets in your repo and whish to use the `profiles:decompose` plugin, you will need to:
+    - If you are are tracking profiles and/or permissionsets in your repo and wish to use the `profiles:decompose` plugin, you will need to:
       - Uncomment the following lines in .gitignore 
         - force-app/main/default/profiles/*-meta.xml
         - force-app/main/default/permissionsets/*-meta.xml
