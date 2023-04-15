@@ -72,7 +72,7 @@ The following secrets are required to be set in the repository settings:
 - `SALESFORCE_CLIENT_ID`
   - This is the client ID used to generate the JWT token. This is used to authenticate with Salesforce production.
 - `SALESFORCE_DEVHUB_USERNAME`
-  - This is the username of the DevHub org. This is used to authenticate with Salesforce production.
+  - This is the username of the admin user of your DevHub/production org. This is used to authenticate with Salesforce production.
 - `SALESFORCE_TEMPLATE_CONSUMER_KEY`
   - This is the consumer key of the template org. This is used to authenticate with the template sandbox.
 - `SALESFORCE_TEMPLATE_USERNAME`
