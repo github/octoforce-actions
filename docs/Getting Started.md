@@ -41,7 +41,7 @@ These step-by-step instructions will walk you through your initial project setup
     - `SALESFORCE_TEMPLATE_CONSUMER_KEY` - use the consumer key of the octoforce connected app replicated from production to your template sandbox
     - `SALESFORCE_TEMPLATE_JWT_SECRET_KEY` - use the value of the server.key file related to your template certificate
     - `SALESFORCE_TEMPLATE_USERNAME` - use the username of the salesforce admin user replicated in your template sandbox
-9. [Follow these directions](https://github.com/github/octoforce-actions/blob/add-setup-docs/docs/SFDX%20Auth%20URLs%20%26%20Encryption.md) for the AGE key setup. 
+9. [Follow these directions](https://github.com/github/octoforce-actions/blob/add-setup-docs/docs/SFDX%20Auth%20URLs%20%26%20Encryption.md) for the AGE key setup. Be sure to store the generated private key in the `SALESFORCE_TEMPLATE_CONSUMER_KEY` repo secret.
 10. Create a GitHub PAT with "repo" scope and store its value as a secret in your repo with the key `SCOPED_PAT`.
 11. Configure the repository variables listed at the bottom of this document to your liking.
 12. Create a release branch in line with the release branch naming strategy you've decided upon.
