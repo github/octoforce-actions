@@ -4,7 +4,7 @@
 Before you begin setting up your new project, you'll need to make a few important decisions about how you use this project and set some repo variables accordingly.
 
 #### Branch naming conventions
-The workflows in this repo execute only on branches whose names match certain user-configurable patterns.  For example, when issue branches are created, dev and UAT sandboxes will be created.  And when pull requests are opened against a release branch, the pull request will be deployed to a UAT org.  Therefore, you'll need to decide upon the prefixes that those workflows will use to identify issue and release branches.  Once you've decided on your naming conventions, you'll need to set repository variables to store the branch prefixes.  If you're unsure what values to use, we recommend the following:
+The workflows in this repo execute only on branches whose names match certain user-configurable patterns.  For example, when issue branches are created, dev and UAT sandboxes will be created.  And when pull requests are opened against a release branch, the pull request will be deployed to a UAT org.  Therefore, you'll need to decide upon the branch name prefixes that those workflows will use to identify issue and release branches.  Once you've decided on your naming conventions, you'll need to set repository variables to store the branch prefixes.  If you're unsure what values to use, we recommend the following:
 | Branch type | Prefix | Repo variable name |
 | ----------- | ------ | ------------------ |
 | Issue       | issue- | ISSUE_BRANCH_PREFIX |
