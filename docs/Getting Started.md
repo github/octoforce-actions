@@ -23,7 +23,7 @@ These step-by-step instructions will walk you through your initial project setup
 1. [Create a new repository](https://github.com/new?owner=&template_name=octoforce-actions&template_owner=github) from this repo.  Check out your new repo locally.
 2. If you haven't already, [enable DevHub](https://help.salesforce.com/s/articleView?id=sf.sfdx_setup_enable_devhub.htm&type=5) in your production Salesforce org.  Workflows in this repo will use your org's DevHub to provision development and test sandboxes for your project.
 3. Create (or repurpose an existing) an admin user in your production org that will be used for deployments and sandbox provisioning.
-4. create a [private key and certificate for use in the app you'll create in the next step](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_key_and_cert.htm)
+4. Create a [private key and certificate for use in the app you'll create in the next step](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_key_and_cert.htm)
 5. Create a connected app in your production Salesforce org for the octoforce CI/CD application that will be provisioning sandboxes and deploying to production.
     - Name your app 'octoforce' or something similar.
     - Set the `Permitted Users` field to "Admin approved users are pre-authorized"
