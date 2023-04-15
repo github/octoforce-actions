@@ -37,13 +37,16 @@ These step-by-step instructions will walk you through your initial project setup
       - `SALESFORCE_JWT_KEY` - use the contents of the server.key file generated in step 4 above
       - `SALESFORCE_CLIENT_ID` - use the Consumer Key of the connected app you just created
 6. Clone your production org to create a sandbox named "template".  This is the org that will be cloned to create your dev and uat sandboxes.
-7. When your newly created template sandbox is provisioned, configure it identically to how you did in step 5 above.  You can use the same certificate and key pair or generate new ones. 
-8. [Follow these directions](https://github.com/github/octoforce-actions/blob/add-setup-docs/docs/SFDX%20Auth%20URLs%20%26%20Encryption.md) for the AGE key setup. 
-9. Create a GitHub PAT with "repo" scope and store its value as a secret in your repo with the key `SCOPED_PAT`.
-10. Configure the repository variables listed at the bottom of this document to your liking.
-11. Create a release branch in line with the release branch naming strategy you've decided upon.
-12. In your local copy of your new repo, run the `scripts/setup` script to install all required plugins.
-13. Import your Salesforce org's metadata into your repo:
+7. When your newly created template sandbox is provisioned, configure it identically to how you did in step 5 above.  You can use the same certificate and key pair or generate new ones. Create two repo secrets with the following values from your template sandbox:
+    - `SALESFORCE_TEMPLATE_CONSUMER_KEY` - use the consumer key of the octoforce connected app replicated from production to your template sandbox
+    - `SALESFORCE_TEMPLATE_JWT_SECRET_KEY` - use the value of the server.key file related to your template certificate
+    - `SALESFORCE_TEMPLATE_USERNAME` - use the username of the salesforce admin user replicated in your template sandbox
+9. [Follow these directions](https://github.com/github/octoforce-actions/blob/add-setup-docs/docs/SFDX%20Auth%20URLs%20%26%20Encryption.md) for the AGE key setup. 
+10. Create a GitHub PAT with "repo" scope and store its value as a secret in your repo with the key `SCOPED_PAT`.
+11. Configure the repository variables listed at the bottom of this document to your liking.
+12. Create a release branch in line with the release branch naming strategy you've decided upon.
+13. In your local copy of your new repo, run the `scripts/setup` script to install all required plugins.
+14. Import your Salesforce org's metadata into your repo:
     - Create an issue to import your Salesforce metadata into your repo.
     - Create a new branch for your issue, following the issue branch naming convention (e.g., issue-1 for your repo).  **Wait for your dev and uat sandboxes to be fully provisioned before proceeding.**
     - Check out your new issue branch locally and run the `scripts/sandbox_auth` script.  You will be prompted to log into your newly created dev and uat sandboxes.
@@ -57,7 +60,7 @@ These step-by-step instructions will walk you through your initial project setup
     - Retrieve your metadata with `scripts/retrieve -u issue-# -x package.xml` (replacing "issue-#" with the correct issue branch prefix and issue number)
     - Add your org's metadata to your repo with: `git add force-app`; git commit -m "initial metadata import"; git push origin
     - Open a pull request for your issue branch against your release branch.  A workflow will attempt to deploy your PR to the UAT org for your issue.  You may need to refine your package.xml and .forceignore files and re-retrieve your org's metadata to get your deployment to pass.
-14. Once your UAT deployment passes, you can merge the pull request created above and create and merge a new pull request that merges your release branch to your main branch.  This will deploy your metadata to your production org.
+15. Once your UAT deployment passes, you can merge the pull request created above and create and merge a new pull request that merges your release branch to your main branch.  This will deploy your metadata to your production org.
 
 Consult the [dev flow](./Dev_Flow.md) documentation to learn how your team should use this project once it has been set up.
 
