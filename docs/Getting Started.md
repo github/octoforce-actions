@@ -22,7 +22,7 @@ These step-by-step instructions will walk you through your initial project setup
 
 1. [Create a new repository](https://github.com/new?owner=&template_name=octoforce-actions&template_owner=github) from this repo.  Check out your new repo locally.
 2. If you haven't already, [enable DevHub](https://help.salesforce.com/s/articleView?id=sf.sfdx_setup_enable_devhub.htm&type=5) in your production Salesforce org.  Workflows in this repo will use your org's DevHub to provision development and test sandboxes for your project.
-3. Create (or repurpose an existing) an admin user in your production org that will be used for deployments and sandbox provisioning.
+3. Create (or repurpose an existing) an admin user in your production org that will be used for deployments and sandbox provisioning.  Store the username of this user in a repo setting named `SALESFORCE_DEVHUB_USERNAME`.
 4. Create a [private key and certificate for use in the app you'll create in the next step](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_key_and_cert.htm)
 5. Create a connected app in your production Salesforce org for the octoforce CI/CD application that will be provisioning sandboxes and deploying to production.
     - Name your app 'octoforce' or something similar.
@@ -33,6 +33,9 @@ These step-by-step instructions will walk you through your initial project setup
       -  Manage user data via APIs
     - For the Callback URL field, enter https://localhost
     - Grant the "system administrator" profile (or whichever profile the user designated in step 3 is assigned) access to the new connected app
+    - Store the following secrets in your repo:
+      - `SALESFORCE_JWT_KEY` - use the contents of the server.key file generated in step 4 above
+      - `SALESFORCE_CLIENT_ID` - use the Consumer Key of the connected app you just created
 6. Clone your production org to create a sandbox named "template".  This is the org that will be cloned to create your dev and uat sandboxes.
 7. When your newly created template sandbox is provisioned, configure it identically to how you did in step 5 above.  You can use the same certificate and key pair or generate new ones. 
 8. [Follow these directions](https://github.com/github/octoforce-actions/blob/add-setup-docs/docs/SFDX%20Auth%20URLs%20%26%20Encryption.md) for the AGE key setup. 
