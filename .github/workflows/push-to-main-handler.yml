@@ -60,18 +60,18 @@ jobs:
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
 
       - name: Generate Destructive Changes Param
-        if: steps.requires-deploy.outputs.changed == '1'
+        if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
         id: check_for_destructive_changes
         run: |
           if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
-            echo ::set-output name=DESTRUCTIVE_FILES::'--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml';
+            echo "DESTRUCTIVE_FILES=--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> $GITHUB_OUTPUT;
           elif [ -f destructive-changes/destructiveChangesPre.xml ]
           then 
-            echo ::set-output name=DESTRUCTIVE_FILES::'--predestructivechanges destructive-changes/destructiveChangesPre.xml';
+            echo "DESTRUCTIVE_FILES=--predestructivechanges destructive-changes/destructiveChangesPre.xml" >> $GITHUB_OUTPUT;
           elif [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
-            echo ::set-output name=DESTRUCTIVE_FILES::'--postdestructivechanges destructive-changes/destructiveChangesPost.xml';
+            echo "DESTRUCTIVE_FILES=--postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> $GITHUB_OUTPUT;
           fi
 
       - name: Deploy to Production

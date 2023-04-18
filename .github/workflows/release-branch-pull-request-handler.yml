@@ -62,13 +62,13 @@ jobs:
         run: |
           if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
-            echo "DESTRUCTIVE_FILES='--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml'" >> $GITHUB_OUTPUT;
+            echo "DESTRUCTIVE_FILES=--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> $GITHUB_OUTPUT;
           elif [ -f destructive-changes/destructiveChangesPre.xml ]
           then 
-            echo "DESTRUCTIVE_FILES='--predestructivechanges destructive-changes/destructiveChangesPre.xml'" >> $GITHUB_OUTPUT;
+            echo "DESTRUCTIVE_FILES=--predestructivechanges destructive-changes/destructiveChangesPre.xml" >> $GITHUB_OUTPUT;
           elif [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
-            echo "DESTRUCTIVE_FILES='--postdestructivechanges destructive-changes/destructiveChangesPost.xml'" >> $GITHUB_OUTPUT;
+            echo "DESTRUCTIVE_FILES=--postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> $GITHUB_OUTPUT;
           fi
       - name: Authenticate to UAT Sandbox
         if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1'
