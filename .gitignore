@@ -44,3 +44,7 @@ server.key
 
 # octoforce files
 auth/sandbox-login-url*.txt
+
+# if using the profiles:decompose plugin, uncomment the following lines
+# force-app/main/default/profiles/*.xml
+# force-app/main/default/permissionsets/*.xml

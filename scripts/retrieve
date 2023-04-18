@@ -1,0 +1,8 @@
+#!/bin/sh
+# wrapper for sfdx force:source:retrieve that runs our profile splitter after retrieval
+
+set -e
+
+sfdx force:source:retrieve $@
+# pass the following command either --md-types=profiles or --md-types=permissionsets if you wish to store only one of these metadata types in your project.
+sfdx profiles:decompose 
