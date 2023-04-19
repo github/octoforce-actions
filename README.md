@@ -11,15 +11,16 @@ A lightweight open-source template Salesforce CI/CD built on the [`GitHub` actio
 - Support for including desctructive changes in deployments.
 - Script to authenticate against sandboxes using `SFDX` and encrypt the credentials for use in GitHub Actions.
 - Setup script for MacOS to setup `SFDX` and `NodeJS` as well other development dependencies.
-- Basic Docker for configuration for use in [`Codespaces`](https://github.com/features/codespaces).
+- Basic Docker configuration for use in [`Codespaces`](https://github.com/features/codespaces).
 
 ### Limitations
 
 - Setup script does not support Windows.
+- The number of dev sandboxes you are entitled to will determine how many issues your team can work on simultaneously.
 
 ## Background
 
-This project is meant to be helpful guide and starting point for Salesforce developers who want to automate their CI/CD process using GitHub Actions. It is not meant to be a complete solution for all Salesforce development teams.
+This project is meant to be a starting point for Salesforce developers who want to automate their CI/CD process using GitHub Actions. It is not meant to be a complete solution for all Salesforce development teams.
 
 ## Requirements
 
@@ -27,7 +28,13 @@ NodeJS 14.x is the minimum requirement for this project. More recent versions of
 The setup scripts require MacOS to run locally, however is not required to make use of this template.
 The sandbox authentication script requires `SFDX` to be installed and configured and requires a bash environment.
 
-These actions rely on several repository secrets and variables to be set in the repository settings. Please refer to the [Required Configurations](./docs/Getting%20Started.md) section of our getting started doc for more details.
+These actions rely on several repository secrets and variables to be set in the repository settings. Please refer to the [Required Configurations](./docs/Getting%20Started.md#required-configurations) section of our getting started doc for more details.
+
+Your team will be required to follow the dev flow outlined [here](docs/Dev_Flow.md) in order for the workflows in this repo to function as expected.
+
+## Getting Started
+
+See the [setup guide](docs/Getting%20Started.md).
 
 ## License
 
