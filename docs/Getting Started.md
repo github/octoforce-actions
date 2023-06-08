@@ -22,7 +22,7 @@ These step-by-step instructions will walk you through your initial project setup
 
 1. [Create a new repository](https://github.com/new?owner=&template_name=octoforce-actions&template_owner=github) from this repo. Check out your new repo locally.
 2. If you haven't already, [enable DevHub](https://help.salesforce.com/s/articleView?id=sf.sfdx_setup_enable_devhub.htm&type=5) in your production Salesforce org. Workflows in this repo will use your org's DevHub to provision development and test sandboxes for your project.
-3. Create (or repurpose an existing) an admin user in your production org that will be used for deployments and sandbox provisioning. Store the username of this user in a repo secret named `SALESFORCE_DEVHUB_USERNAME`.
+3. Create (or repurpose an existing) an admin user in your production org that will be used for deployments and sandbox provisioning. Store the username of this user in a repo secret named `SALESFORCE_PROD_USERNAME`.
 4. Create a [private key and certificate for use in the app you'll create in the next step](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_key_and_cert.htm)
 5. Create a connected app in your production Salesforce org for the octoforce CI/CD application that will be provisioning sandboxes and deploying to production.
     - Name your app 'octoforce' or something similar.
@@ -80,7 +80,7 @@ The following secrets are required to be set in the repository settings:
   - This is the private key used to generate the JWT token. This is used to authenticate with Salesforce production.
 - `SALESFORCE_CLIENT_ID`
   - This is the client ID used to generate the JWT token. This is used to authenticate with Salesforce production.
-- `SALESFORCE_DEVHUB_USERNAME`
+- `SALESFORCE_PROD_USERNAME`
   - This is the username of the admin user of your DevHub/production org. This is used to authenticate with Salesforce production.
 - `SALESFORCE_TEMPLATE_CLIENT_ID`
   - This is the consumer key of the template org. This is used to authenticate with the template sandbox.
