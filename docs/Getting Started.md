@@ -35,7 +35,7 @@ These step-by-step instructions will walk you through your initial project setup
     - Grant the "system administrator" profile (or whichever profile the user designated in step 3 is assigned) access to the new connected app
     - Store the following secrets in your repo:
       - `SALESFORCE_JWT_KEY` - use the contents of the server.key file generated in step 4 above
-      - `SALESFORCE_CLIENT_ID` - use the Consumer Key of the connected app you just created
+      - `SALESFORCE_PROD_CLIENT_ID` - use the Consumer Key of the connected app you just created
 6. Clone your production org to create a sandbox named "template". This is the org that will be cloned to create your dev and uat sandboxes.
 7. When your newly created template sandbox is provisioned, configure it identically to how you did in step 5 above. You can use the same certificate and key pair or generate new ones. Create two repo secrets with the following values from your template sandbox:
     - `SALESFORCE_TEMPLATE_CLIENT_ID` - use the consumer key of the octoforce connected app replicated from production to your template sandbox
@@ -78,7 +78,7 @@ The following secrets are required to be set in the repository settings:
   - This is a personal access token with the `repo` scope. This is used to checkout the repository and push any changes.
 - `SALESFORCE_JWT_KEY`
   - This is the private key used to generate the JWT token. This is used to authenticate with Salesforce production.
-- `SALESFORCE_CLIENT_ID`
+- `SALESFORCE_PROD_CLIENT_ID`
   - This is the client ID used to generate the JWT token. This is used to authenticate with Salesforce production.
 - `SALESFORCE_PROD_USERNAME`
   - This is the username of the admin user of your DevHub/production org. This is used to authenticate with Salesforce production.
