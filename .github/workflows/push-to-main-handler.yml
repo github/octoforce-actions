@@ -121,7 +121,7 @@ jobs:
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
           echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > template-server.key
-          npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwtkeyfile template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} -a Template --instanceurl https://test.salesforce.com
+          npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_TEMPLATE_CLIENT_ID }} --jwtkeyfile template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} -a Template --instanceurl https://test.salesforce.com
           npx sfdx-cli force:org:display --json -u Template > sfdx-auth.json
         env:
           SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}

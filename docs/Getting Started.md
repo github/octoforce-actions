@@ -38,7 +38,7 @@ These step-by-step instructions will walk you through your initial project setup
       - `SALESFORCE_CLIENT_ID` - use the Consumer Key of the connected app you just created
 6. Clone your production org to create a sandbox named "template". This is the org that will be cloned to create your dev and uat sandboxes.
 7. When your newly created template sandbox is provisioned, configure it identically to how you did in step 5 above. You can use the same certificate and key pair or generate new ones. Create two repo secrets with the following values from your template sandbox:
-    - `SALESFORCE_TEMPLATE_CONSUMER_KEY` - use the consumer key of the octoforce connected app replicated from production to your template sandbox
+    - `SALESFORCE_TEMPLATE_CLIENT_ID` - use the consumer key of the octoforce connected app replicated from production to your template sandbox
     - `SALESFORCE_TEMPLATE_JWT_SECRET_KEY` - use the value of the server.key file related to your template certificate
     - `SALESFORCE_TEMPLATE_USERNAME` - use the username of the salesforce admin user replicated in your template sandbox
 9. [Follow these directions](https://github.com/github/octoforce-actions/blob/add-setup-docs/docs/SFDX%20Auth%20URLs%20%26%20Encryption.md) to generate and store your age encryption keys. Be sure to store the generated private key in the `SFDX_AUTH_SECRET_KEY` repo secret and to replace the contents of `auth/public-key.txt`.
@@ -82,7 +82,7 @@ The following secrets are required to be set in the repository settings:
   - This is the client ID used to generate the JWT token. This is used to authenticate with Salesforce production.
 - `SALESFORCE_DEVHUB_USERNAME`
   - This is the username of the admin user of your DevHub/production org. This is used to authenticate with Salesforce production.
-- `SALESFORCE_TEMPLATE_CONSUMER_KEY`
+- `SALESFORCE_TEMPLATE_CLIENT_ID`
   - This is the consumer key of the template org. This is used to authenticate with the template sandbox.
 - `SALESFORCE_TEMPLATE_USERNAME`
   - This is the username of the template org. This is used to authenticate with the template sandbox.
