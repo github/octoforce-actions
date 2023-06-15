@@ -42,7 +42,7 @@ jobs:
 
       - name: Install profile decompose sfdx plugin
         if: steps.requires-deploy.outputs.changed == '1'
-        run: echo y | npx sfdx plugins:install @rdietrick/sfdx-profile-decompose
+        run: echo y | node_modules/sfdx-cli/bin/run plugins:install @rdietrick/sfdx-profile-decompose
 
       - name: Authenticate DevHub
         if: steps.requires-deploy.outputs.changed == '1'
@@ -50,13 +50,13 @@ jobs:
           SALESFORCE_JWT_KEY: ${{ secrets.SALESFORCE_JWT_KEY }}
         run: |
           echo "${SALESFORCE_JWT_KEY}" > server.key
-          npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_PROD_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_PROD_USERNAME}} --setdefaultdevhubusername -a DevHub
-          npx sfdx force:org:display --json -u DevHub > sfdx-auth.json
+          node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_PROD_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_PROD_USERNAME}} --setdefaultdevhubusername -a DevHub
+          node_modules/sfdx-cli/bin/run force:org:display --json -u DevHub > sfdx-auth.json
 
       - name: Recompose profiles
         if: steps.requires-deploy.outputs.changed == '1' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
         run: |
-          npx sfdx profiles:aggregate
+          node_modules/sfdx-cli/bin/run profiles:aggregate
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
 
       - name: Generate Destructive Changes Param
@@ -77,8 +77,8 @@ jobs:
       - name: Deploy to Production
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
-          npx sfdx force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
-          npx sfdx force:source:deploy -u DevHub -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
+          node_modules/sfdx-cli/bin/run force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
+          node_modules/sfdx-cli/bin/run force:source:deploy -u DevHub -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
 
       - name: Get Previous Tag
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
@@ -121,16 +121,16 @@ jobs:
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
           echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > template-server.key
-          npx sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_TEMPLATE_CLIENT_ID }} --jwtkeyfile template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} -a Template --instanceurl https://test.salesforce.com
-          npx sfdx force:org:display --json -u Template > sfdx-auth.json
+          node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_TEMPLATE_CLIENT_ID }} --jwtkeyfile template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} -a Template --instanceurl https://test.salesforce.com
+          node_modules/sfdx-cli/bin/run force:org:display --json -u Template > sfdx-auth.json
         env:
           SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}
 
       - name: Update Template sandbox
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
-          npx sfdx force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
-          npx sfdx force:source:deploy -u Template -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
+          node_modules/sfdx-cli/bin/run force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
+          node_modules/sfdx-cli/bin/run force:source:deploy -u Template -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
 
       - name: Create PR with cleaned up destructive changes
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
