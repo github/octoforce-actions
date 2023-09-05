@@ -32,7 +32,8 @@
     "lint-staged": "^12.5.0",
     "prettier": "^2.7.1",
     "prettier-plugin-apex": "^1.11.0",
-    "sfdx-cli": "^7.176.1"
+    "sfdx": "^1.4.2",
+    "sfdx-cli": "^7.203.6"
   },
   "lint-staged": {
     "**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}": [

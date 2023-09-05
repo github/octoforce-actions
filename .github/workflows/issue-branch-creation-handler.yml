@@ -40,11 +40,11 @@ jobs:
         if: steps.branchFilter.outputs.matches == 'true'
         run: |
           echo "${{ secrets.SALESFORCE_JWT_KEY }}" > server.key
-          node_modules/sfdx-cli/bin/run force:auth:jwt:grant \
-            --clientid ${{ secrets.SALESFORCE_PROD_CLIENT_ID }} \
-            --jwtkeyfile server.key \
+          npx sf org login jwt \
+            --client-id ${{ secrets.SALESFORCE_PROD_CLIENT_ID }} \
+            --jwt-key-file server.key \
             --username ${{ secrets.SALESFORCE_PROD_USERNAME }} \
-            --setdefaultdevhubusername -a DevHub
+            --set-default-dev-hub -a Prod
           rm server.key
       - name: Extract Branch Name
         if: steps.branchFilter.outputs.matches == 'true'
