@@ -45,8 +45,8 @@ jobs:
       - name: Recompose Profiles
         if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
         run: |
-          echo y | node_modules/sfdx-cli/bin/run plugins:install @rdietrick/sfdx-profile-decompose
-          node_modules/sfdx-cli/bin/run profiles:aggregate
+          echo y | npx sf plugins:install @rdietrick/sfdx-profile-decompose
+          npx sf profiles:aggregate
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
       - name: Check First Deploy
         if: vars.GENERATE_RELEASE == 'true' && steps.branchFilter.outputs.matches == 'true'
@@ -80,14 +80,14 @@ jobs:
           echo "$SFDX_AUTH_SECRET_KEY" >> key.txt
           age --decrypt -i key.txt ${LOGIN_ENC_FILE}.age > ${LOGIN_ENC_FILE}
           rm key.txt
-          node_modules/sfdx-cli/bin/run force:auth:sfdxurl:store -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
+          npx sf force auth sfdxurl store -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
       - name: Deploy Source to Sandbox
         if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1'
         env:
           LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
         run: |
-          node_modules/sfdx-cli/bin/run force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
-          node_modules/sfdx-cli/bin/run force:source:deploy -u is${{ steps.branchFilter.outputs.issueNumber }}uat -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w ${{ vars.DEPLOYMENT_TIMEOUT }} -l RunLocalTests
+          npx sf force source manifest create -p force-app -n temp-deploy-manifest
+          npx sf project deploy start -o is${{ steps.branchFilter.outputs.issueNumber }}uat -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w ${{ vars.DEPLOYMENT_TIMEOUT }} -l RunLocalTests --ignore-conflicts
       - name: Init Release Notes
         id: init-release-notes
         if: vars.GENERATE_RELEASE == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'

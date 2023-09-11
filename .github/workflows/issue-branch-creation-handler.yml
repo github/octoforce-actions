@@ -44,7 +44,7 @@ jobs:
             --client-id ${{ secrets.SALESFORCE_PROD_CLIENT_ID }} \
             --jwt-key-file server.key \
             --username ${{ secrets.SALESFORCE_PROD_USERNAME }} \
-            --set-default-dev-hub -a Prod
+            --set-default-dev-hub -a DevHub
           rm server.key
       - name: Extract Branch Name
         if: steps.branchFilter.outputs.matches == 'true'
