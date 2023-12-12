@@ -15,7 +15,7 @@ else
     then
         DEV_ALIAS=$BRANCH_NAME
     fi
-    sfdx force:auth:web:login -a $DEV_ALIAS -r https://test.salesforce.com
+    sfdx org login web -a $DEV_ALIAS -r https://test.salesforce.com
     PID=$!
     wait $PID
 fi
@@ -37,13 +37,13 @@ fi
 if [[ $noUatAuth ]]; then
     echo "===> Skipping SFDC uat org authentication."
 else
-    sfdx force:auth:web:login -a $UAT_ALIAS -r https://test.salesforce.com
+    sfdx org login web -a $UAT_ALIAS -r https://test.salesforce.com
     PID=$!
     wait $PID
 fi
 
-echo "===> Generating encrypted sfdx auth URL file... "
-ORG_INFO="$(sfdx force:org:display -u $UAT_ALIAS --verbose 2>/dev/null)"
+echo "===> Generating encrypted login URL ... "
+ORG_INFO="$(sfdx org display -o $UAT_ALIAS --verbose 2>/dev/null)"
 LOGIN_URL=$(echo "$ORG_INFO" | awk -F "Sfdx Auth Url" '{print $2}' | xargs)
 LOGIN_URL_FILE=auth/sandbox-login-url-${BRANCH_NAME}-uat.txt
 echo ${LOGIN_URL} > ${LOGIN_URL_FILE}
