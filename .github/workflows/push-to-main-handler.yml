@@ -35,9 +35,9 @@ jobs:
         run: |
           NOTE_FILES=$(git diff --name-only HEAD^ HEAD -- 'release-notes/release.md')
           if [ -z "$NOTE_FILES" ] ; then
-            echo ::set-output name=IS_RELEASE::false
+            echo "IS_RELEASE=false" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=IS_RELEASE::true
+            echo "IS_RELEASE=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Install profile decompose sfdx plugin
@@ -102,7 +102,7 @@ jobs:
         id: get_date
         run: |
           TODAYS_DATE=$(date +'%b %d, %Y')
-          echo ::set-output name=RELEASE_DATE::$TODAYS_DATE
+          echo "RELEASE_DATE=$TODAYS_DATE" >> $GITHUB_OUTPUT
 
       - name: Create Release
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
