@@ -35,9 +35,9 @@ jobs:
         run: |
           NOTE_FILES=$(git diff --name-only HEAD^ HEAD -- 'release-notes/release.md')
           if [ -z "$NOTE_FILES" ] ; then
-            echo ::set-output name=IS_RELEASE::false
+            echo "IS_RELEASE=false" >> "$GITHUB_OUTPUT"
           else
-            echo ::set-output name=IS_RELEASE::true
+            echo "IS_RELEASE=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Install profile decompose sfdx plugin
@@ -65,13 +65,13 @@ jobs:
         run: |
           if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
-            echo "DESTRUCTIVE_FILES=--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> $GITHUB_OUTPUT;
+            echo "DESTRUCTIVE_FILES=--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
           elif [ -f destructive-changes/destructiveChangesPre.xml ]
           then 
-            echo "DESTRUCTIVE_FILES=--predestructivechanges destructive-changes/destructiveChangesPre.xml" >> $GITHUB_OUTPUT;
+            echo "DESTRUCTIVE_FILES=--predestructivechanges destructive-changes/destructiveChangesPre.xml" >> "$GITHUB_OUTPUT";
           elif [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
-            echo "DESTRUCTIVE_FILES=--postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> $GITHUB_OUTPUT;
+            echo "DESTRUCTIVE_FILES=--postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
           fi
 
       - name: Deploy to Production
@@ -102,7 +102,7 @@ jobs:
         id: get_date
         run: |
           TODAYS_DATE=$(date +'%b %d, %Y')
-          echo ::set-output name=RELEASE_DATE::$TODAYS_DATE
+          echo "RELEASE_DATE=$TODAYS_DATE" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
