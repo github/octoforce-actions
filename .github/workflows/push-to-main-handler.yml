@@ -40,7 +40,8 @@ jobs:
             echo "IS_RELEASE=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Install profile decompose sfdx plugin
+      - name: Install profile decompose sf plugin # ERROR: Unable to convert this command; you must convert it manually.
+
         if: steps.requires-deploy.outputs.changed == '1'
         run: echo y | npx sfdx-cli plugins:install @rdietrick/sfdx-profile-decompose
 
@@ -51,7 +52,7 @@ jobs:
         run: |
           echo "${SALESFORCE_JWT_KEY}" > server.key
           npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
-          npx sfdx-cli force:org:display --json -u DevHub > sfdx-auth.json
+          npx sf org display --json -o DevHub > sfdx-auth.json
 
       - name: Recompose profiles
         if: steps.requires-deploy.outputs.changed == '1' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
@@ -77,8 +78,8 @@ jobs:
       - name: Deploy to Production
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
-          npx sfdx-cli force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
-          npx sfdx-cli force:source:deploy -u DevHub -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
+          sudo npx sf project generate manifest -p force-app -n temp-deploy-manifest
+          sudo npx sf project deploy start -o DevHub -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests --ignore-conflicts
 
       - name: Get Previous Tag
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
@@ -121,16 +122,16 @@ jobs:
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
           echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > template-server.key
-          npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwtkeyfile template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} -a Template --instanceurl https://test.salesforce.com
-          npx sfdx-cli force:org:display --json -u Template > sfdx-auth.json
+          sudo npx sf org login jwt --client-id ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwt-key-file template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} --alias Template --instance-url https://test.salesforce.com
+          sudo npx sf org display --json -o Template > sfdx-auth.json
         env:
           SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}
 
       - name: Update Template sandbox
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
-          npx sfdx-cli force:source:manifest:create --sourcepath force-app --manifestname temp-deploy-manifest
-          npx sfdx-cli force:source:deploy -u Template -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests
+          sudo npx sf project generate manifest -p force-app -n temp-deploy-manifest
+          sudo npx sf org display --json -o Template > sfdx-auth.json
 
       - name: Create PR with cleaned up destructive changes
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
