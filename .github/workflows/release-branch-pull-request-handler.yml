@@ -108,7 +108,7 @@ jobs:
           ISSUE_JSON="${ISSUE_JSON//$'\r'/'%0D'}"
           echo "ISSUE=$ISSUE_JSON" >> "$GITHUB_OUTPUT";
           rm issue.json
-      - uses: stefanzweifel/git-auto-commit-action@v4.15.4
+      - uses: stefanzweifel/git-auto-commit-action@75802d269e7721b5146d08f6063ba3097c55ad2b
         if: vars.GENERATE_RELEASE == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
         with:
           branch: ${{ github.head_ref }}
