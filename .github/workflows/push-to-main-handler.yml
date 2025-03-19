@@ -43,7 +43,7 @@ jobs:
       - name: Install profile decompose sf plugin # ERROR: Unable to convert this command; you must convert it manually.
 
         if: steps.requires-deploy.outputs.changed == '1'
-        run: echo y | npx sfdx-cli plugins:install @rdietrick/sfdx-profile-decompose
+        run: echo y | npx sf plugins install @rdietrick/sfdx-profile-decompose
 
       - name: Authenticate DevHub
         if: steps.requires-deploy.outputs.changed == '1'
@@ -51,13 +51,13 @@ jobs:
           SALESFORCE_JWT_KEY: ${{ secrets.SALESFORCE_JWT_KEY }}
         run: |
           echo "${SALESFORCE_JWT_KEY}" > server.key
-          npx sfdx-cli force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --setdefaultdevhubusername -a DevHub
+          npx sf auth jwt grant  --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --set-default-dev-hub -a DevHub
           npx sf org display --json -o DevHub > sfdx-auth.json
 
       - name: Recompose profiles
         if: steps.requires-deploy.outputs.changed == '1' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
         run: |
-          npx sfdx-cli profiles:aggregate
+          npx sf profiles:aggregate
           rm -rf force-app/main/default/profiles/decomposed force-app/main/default/permissionsets/decomposed
 
       - name: Generate Destructive Changes Param

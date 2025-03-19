@@ -38,10 +38,10 @@ echo "===> Installing all dependencies from package.json"
 npm install
 
 # this does not seem to work, find out how to identify if sfdx is installed globally
-if ! which sfdx > /dev/null
+if ! which sf > /dev/null
 then
     echo "===> Installing sfdx CLI (globally)" 
-    npm install sfdx-cli --global
+    npm install -g @salesforce/cli
 fi
 
 if [[ $noPlugins ]]; then
@@ -54,10 +54,10 @@ else
     cd sfdx-plugins
 
     echo "===> Installing sfdx-profile-decompose plugin "
-    sfdx plugins:install @rdietrick/sfdx-profile-decompose
+    sf plugins:install @rdietrick/sfdx-profile-decompose
 
     echo "===> Installing sfdx-plugin-prettier plugin "
-    sfdx plugins:install @jayree/sfdx-plugin-prettier
+    sf plugins:install @jayree/sfdx-plugin-prettier
 
     cd ../
 
