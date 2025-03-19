@@ -1,0 +1,8 @@
+#!/bin/sh
+# wrapper for sf force:source:retrieve that runs our profile splitter after retrieval
+
+set -e
+
+sf project retrieve start $@
+# pass the following command either --md-types=profiles or --md-types=permissionsets if you wish to store only one of these metadata types in your project.
+sf profiles decompose 

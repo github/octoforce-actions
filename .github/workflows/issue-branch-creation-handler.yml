@@ -40,11 +40,11 @@ jobs:
         if: steps.branchFilter.outputs.matches == 'true'
         run: |
           echo "${{ secrets.SALESFORCE_JWT_KEY }}" > server.key
-          npx sfdx force:auth:jwt:grant \
-            --clientid ${{ secrets.SALESFORCE_CLIENT_ID }} \
-            --jwtkeyfile server.key \
+          npx sf auth jwt grant \
+            --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} \
+            --jwt-key-file server.key \
             --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} \
-            --setdefaultdevhubusername -a DevHub
+            --set-default-dev-hub -a DevHub
           rm server.key
       - name: Extract Branch Name
         if: steps.branchFilter.outputs.matches == 'true'
@@ -53,11 +53,13 @@ jobs:
         id: extract_branch
       - name: Create Dev Sandbox
         if: steps.branchFilter.outputs.matches == 'true'
+        env:
+          BRANCH: ${{ steps.extract_branch.outputs.branch }}
         run: |
           set +e
           npx sf env create sandbox --clone Template \
             --name is${{ steps.branchFilter.outputs.issueNumber }} \
-            --alias ${{ steps.extract_branch.outputs.branch }} \
+            --alias $BRANCH \
             --target-org DevHub --async --no-prompt
           if [ $? -eq 68 ]
           then
@@ -67,11 +69,13 @@ jobs:
           fi
       - name: Create UAT Sandbox
         if: steps.branchFilter.outputs.matches == 'true'
+        env:
+          BRANCH: ${{ steps.extract_branch.outputs.branch }}
         run: |
           set +e
           npx sf env create sandbox --clone Template \
             --name is${{ steps.branchFilter.outputs.issueNumber }}uat \
-            --alias ${{ steps.extract_branch.outputs.branch }}-uat \
+            --alias ${BRANCH}-uat \
             --target-org DevHub --async --no-prompt
           if [ $? -eq 68 ]
           then

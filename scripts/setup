@@ -22,10 +22,10 @@ then
     brew install gawk
 fi
 
-if ! which openssl  > /dev/null
+if ! which age > /dev/null
 then
-    echo "===> Installing openssl"
-    brew install openssl
+    echo "===> Installing age"
+    brew install age
 fi
 
 if ! which gh  > /dev/null
@@ -38,10 +38,10 @@ echo "===> Installing all dependencies from package.json"
 npm install
 
 # this does not seem to work, find out how to identify if sfdx is installed globally
-if ! which sfdx > /dev/null
+if ! which sf > /dev/null
 then
     echo "===> Installing sfdx CLI (globally)" 
-    npm install sfdx-cli --global
+    npm install -g @salesforce/cli
 fi
 
 if [[ $noPlugins ]]; then
@@ -53,13 +53,11 @@ else
     fi
     cd sfdx-plugins
 
-    SFDX_PLUGINS=$(cat ../config/dev-config.json | jq -r '.sfdxPlugins[]')
-    echo "===> Installing sfdx plugins"
-    for plugin in $SFDX_PLUGINS
-    do
-        echo "Installing $plugin"
-        sfdx plugins:install $plugin
-    done
+    echo "===> Installing sfdx-profile-decompose plugin "
+    sf plugins:install @rdietrick/sfdx-profile-decompose
+
+    echo "===> Installing sfdx-plugin-prettier plugin "
+    sf plugins:install @jayree/sfdx-plugin-prettier
 
     cd ../
 
