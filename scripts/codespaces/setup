@@ -7,14 +7,11 @@ fi
 npm install
 
 SFDX_PLUGINS=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins[]')
-<<<<<<< HEAD
-=======
 pushd .
 cd ~/.config && mkdir sfdx && cd ./sfdx
 echo '["@rdietrick/sfdx-profile-decompose", "@jayree/sfdx-plugin-prettier"]' > unsignedPluginAllowList.json
 popd
 sfdx plugins:install @rdietrick/sfdx-profile-decompose @jayree/sfdx-plugin-prettier
->>>>>>> origin/main
 
 if [[ ! -z "${SFDX_PLUGINS// }" ]]; then
     PLUGIN_ALLOW_LIST=$(cat ./config/dev-config.json | jq -r '.sfdxPlugins')
