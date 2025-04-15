@@ -1,3 +1,9 @@
+permissions:
+  contents: write
+  actions: read
+  packages: read
+  id-token: write
+
 # This workflow runs when a branch is created
 name: Issue Branch Creation Handler
 on: create
