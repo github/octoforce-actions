@@ -1,3 +1,9 @@
+permissions:
+  contents: write
+  pull-requests: read
+  actions: read
+  packages: read
+
 name: Release Branch Merge Handler
 on:
   pull_request:
