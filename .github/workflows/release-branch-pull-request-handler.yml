@@ -1,7 +1,13 @@
+permissions:
+  contents: write
+  pull-requests: read
+  actions: read
+  packages: read
+  id-token: write
+
 name: Release Branch Pull Request Handler
 on:
   pull_request:
-    branches:
 jobs:
   deploy-to-uat-sandbox:
     runs-on: ubuntu-latest
