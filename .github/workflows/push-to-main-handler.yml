@@ -27,6 +27,20 @@ jobs:
         with:
           node-version-file: ".nvmrc"
 
+      - name: Cache Node Modules
+        uses: actions/cache@v3.0.11
+        id: npm_cache_id
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
+            ${{ runner.os }}-
+
+      - name: Install Dependencies
+        if: steps.npm_cache_id.outputs.cache-hit != 'true'
+        run: npm ci
+
       - name: Authorize external workspace
         run: |
           git config --global --add safe.directory /github/workspace
@@ -47,8 +61,7 @@ jobs:
             echo "IS_RELEASE=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Install profile decompose sf plugin # ERROR: Unable to convert this command; you must convert it manually.
-
+      - name: Install profile decompose sf plugin
         if: steps.requires-deploy.outputs.changed == '1'
         run: echo y | npx sf plugins install @rdietrick/sfdx-profile-decompose
 
@@ -58,7 +71,7 @@ jobs:
           SALESFORCE_JWT_KEY: ${{ secrets.SALESFORCE_JWT_KEY }}
         run: |
           echo "${SALESFORCE_JWT_KEY}" > server.key
-          npx sf auth jwt grant  --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --set-default-dev-hub -a DevHub
+          npx sf auth jwt grant  --client-id ${{ secrets.SALESFORCE_PROD_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_PROD_USERNAME}} --set-default-dev-hub -a DevHub
           npx sf org display --json -o DevHub > sfdx-auth.json
 
       - name: Recompose profiles
@@ -71,6 +84,7 @@ jobs:
         if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
         id: check_for_destructive_changes
         run: |
+          DESTRUCTIVE_FILES_EXIST=true
           if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
             echo "DESTRUCTIVE_FILES=--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
@@ -80,13 +94,20 @@ jobs:
           elif [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
             echo "DESTRUCTIVE_FILES=--postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
+          else
+            DESTRUCTIVE_FILES_EXIST=false
+          fi
+          if [ "$DESTRUCTIVE_FILES_EXIST" == "true" ]
+          then
+            RELEASE_DATE=$(TZ=America/Los_Angeles date +'%Y-%m-%d')
+            echo "DESTRUCTIVE_CHANGES_CLEANUP_BRANCH=clean-up-destructive-changes-$RELEASE_DATE" >> $GITHUB_OUTPUT;
           fi
 
       - name: Deploy to Production
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
           sudo npx sf project generate manifest -p force-app -n temp-deploy-manifest
-          sudo npx sf project deploy start -o DevHub -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w 200 -l RunLocalTests --ignore-conflicts
+          sudo npx sf project deploy start -o DevHub -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w ${{ vars.DEPLOYMENT_TIMEOUT }} -l RunLocalTests --ignore-conflicts
 
       - name: Get Previous Tag
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
@@ -129,7 +150,7 @@ jobs:
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
           echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > template-server.key
-          sudo npx sf org login jwt --client-id ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwt-key-file template-server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} --alias Template --instance-url https://test.salesforce.com
+          sudo npx sf org login jwt --client-id ${{ secrets.SALESFORCE_TEMPLATE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME}} --alias Template --instance-url https://test.salesforce.com
           sudo npx sf org display --json -o Template > sfdx-auth.json
         env:
           SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}
@@ -138,27 +159,27 @@ jobs:
         if: steps.requires-deploy.outputs.changed == '1'
         run: |
           sudo npx sf project generate manifest -p force-app -n temp-deploy-manifest
-          sudo npx sf org display --json -o Template > sfdx-auth.json
+          npx sf project deploy start -o Template -x temp-deploy-manifest.xml ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }} -w ${{ vars.DEPLOYMENT_TIMEOUT }} -l RunLocalTests --ignore-conflicts
 
-      - name: Create PR with cleaned up destructive changes
-        if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
-        env:
-          PAT: ${{ secrets.SCOPED_PAT }}
-          USER_EMAIL: ${{ secrets.BOT_USER_EMAIL }}
-          USER_NAME: ${{ secrets.BOT_USER_NAME }}
+      - name: Remove Destructive Change Files
+        if: steps.check_for_destructive_changes.outputs.DESTRUCTIVE_CHANGES_CLEANUP_BRANCH != ''
         run: |
-          if [ -f destructive-changes/destructiveChanges.xml ] || [ -f destructive-changes/destructiveChangesPre.xml ] || [ -f destructive-changes/destructiveChangesPost.xml ]
-          then 
-            RELEASE_DATE=$(date +'%Y-%m-%d')
-            echo $PAT | gh auth login --with-token
-            git config --global user.email "$USER_EMAIL"
-            git config --global user.name "$USER_NAME"
+          git checkout -b ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_CHANGES_CLEANUP_BRANCH }}
+          git clean -fd
+          rm -rf destructive-changes
+      - name: Commit Destructive Change Cleanup
+        if: steps.check_for_destructive_changes.outputs.DESTRUCTIVE_CHANGES_CLEANUP_BRANCH != ''
+        uses: stefanzweifel/git-auto-commit-action@75802d269e7721b5146d08f6063ba3097c55ad2b
+        with:
+          branch: ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_CHANGES_CLEANUP_BRANCH }}
+          commit_message: Clean up destructive changes from release
 
-            git checkout -b clean-up-destructive-changes-"$RELEASE_DATE" && git push --set-upstream origin clean-up-destructive-changes-"$RELEASE_DATE"
-            git rm -r destructive-changes
-            git commit -m "Clean up destructive changes from release" && git push
-
-            gh pr create --title "Clean up destructive changes" \
-            --body "Please merge \`clean-up-destructive-changes-$RELEASE_DATE\` into \`main\` and delete \`clean-up-destructive-changes-$RELEASE_DATE\`." \
-            -H clean-up-destructive-changes-"$RELEASE_DATE" -B main
-          fi
+      - name: Create Destructive Change Cleanup Pull Request
+        if: steps.check_for_destructive_changes.outputs.DESTRUCTIVE_CHANGES_CLEANUP_BRANCH != ''
+        env:
+          DESTRUCTIVE_CHANGE_CLEANUP_BRANCH: ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_CHANGES_CLEANUP_BRANCH }}
+          GH_TOKEN: ${{ secrets.SCOPED_PAT }}
+        run: |
+          gh pr create --title "Clean up destructive changes" \
+            --body "Please merge \`$DESTRUCTIVE_CHANGE_CLEANUP_BRANCH\` into \`main\` and delete \`$DESTRUCTIVE_CHANGE_CLEANUP_BRANCH\`." \
+            -H "$DESTRUCTIVE_CHANGE_CLEANUP_BRANCH" -B main
