@@ -8,6 +8,6 @@ To generate `age` private and public keys, please follow these steps:
 1. Install `age` if it is not already installed
 1. Generate the public and private key:
    - `age-keygen -o key.txt`
-1. Copy the public key that is printed in your terminal and replace the old public key with the new public key in the `auth/public-key.txt` file
-1. Create or replace the value of the `SFDX_AUTH_SECRET_KEY` GitHub Action secret with the contents of the `key.txt` file you created in the first step
+1. Copy the public key that is printed in your terminal and replace the contents of the public key file (`auth/public-key.txt`) with that string.  Then git add and commit this file.
+1. Create or replace the value of the `SFDX_AUTH_SECRET_KEY` GitHub Action secret with the contents of the `key.txt` file you created in the first step.  You can do this with the following command<br/>`gh secret set SFDX_AUTH_SECRET_KEY < key.txt`
 1. Securely remove the `key.txt` file you created in the first step from your machine
