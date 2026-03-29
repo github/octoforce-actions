@@ -12,7 +12,7 @@ The workflows in this repo execute only on branches whose names match certain us
 | Issue | issue- | ISSUE_BRANCH_PREFIX |
 | Release | REL- | RELEASE_BRANCH_PREFIX |
 
-You can assign thes values above using the GitHub CLI with the following commands:
+You can assign the values above using the GitHub CLI with the following commands:
 ```sh
 gh secret set ISSUE_BRANCH_PREFIX -b "issue-"
 gh secret set RELEASE_BRANCH_PREFIX -b "REL-"
