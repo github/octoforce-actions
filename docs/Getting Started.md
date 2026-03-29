@@ -12,6 +12,12 @@ The workflows in this repo execute only on branches whose names match certain us
 | Issue | issue- | ISSUE_BRANCH_PREFIX |
 | Release | REL- | RELEASE_BRANCH_PREFIX |
 
+You can assign thes values above using the GitHub CLI with the following commands:
+```
+gh secret set ISSUE_BRANCH_PREFIX -b "issue-"
+gh secret set RELEASE_BRANCH_PREFIX -b "REL-"
+```
+
 #### Profile and permissionset format
 
 If enabled in this project, an [sfdx plugin](https://www.npmjs.com/package/@rdietrick/sfdx-profile-decompose) can translate monolithic Salesforce profiles and permissionsets into more granular XML files in your project. We've found that this makes managing diffs and conflict resolution in these files much easier. When the plugin is enabled, each profile will, for instance, be broken down into separate files for each object that the profile maintains FLS for. To turn it on, set the repository variable `SALESFORCE_FORMATTED_PROFILES_AND_PERMS` to true. If the plugin is disabled, you will also need to remove or comment out the line in `scripts/retrieve` that executes the profiles:decompose plugin. If you choose to store only profiles or only permissionsets in your repo but wish to use this plugin, you'll need to pass the `--md-types=profiles` or `--md-types=permissionsets` argument to the profiles:decompose command in the retrieve script.
