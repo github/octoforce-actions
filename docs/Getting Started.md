@@ -23,6 +23,11 @@ gh secret set RELEASE_BRANCH_PREFIX -b "REL-"
 
 If enabled in this project, an [sfdx plugin](https://www.npmjs.com/package/@rdietrick/sfdx-profile-decompose) can translate monolithic Salesforce profiles and permissionsets into more granular XML files in your project. We've found that this makes managing diffs and conflict resolution in these files much easier. When the plugin is enabled, each profile will, for instance, be broken down into separate files for each object that the profile maintains FLS for. To turn it on, set the repository variable `SALESFORCE_FORMATTED_PROFILES_AND_PERMS` to true. If the plugin is disabled, you will also need to remove or comment out the line in `scripts/retrieve` that executes the profiles:decompose plugin. If you choose to store only profiles or only permissionsets in your repo but wish to use this plugin, you'll need to pass the `--md-types=profiles` or `--md-types=permissionsets` argument to the profiles:decompose command in the retrieve script.
 
+You can configure your repo for decomposed profiles with the following command:
+```sh
+gh variable set SALESFORCE_FORMATTED_PROFILES_AND_PERMS --body "true"
+```
+
 #### Release tracking
 
 If enabled, each time a release branch is merged to your main branch, a [release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository) will be automatically created in your repo with release notes for each issue included in the release. To turn this on, set the repository variable `GENERATE_RELEASE` to `true`.
