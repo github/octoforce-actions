@@ -37,32 +37,44 @@ If enabled, each time a release branch is merged to your main branch, a [release
 These step-by-step instructions will walk you through your initial project setup. At the end of this process, you should have a fully functioning deploy chain from UAT to production to template and your repo will contain all of the Salesforce metadata you wish to track in version control.
 
 1. [Create a new repository](https://github.com/new?owner=&template_name=octoforce-actions&template_owner=github) from this repo. Check out your new repo locally.
-2. If you haven't already, [enable DevHub](https://help.salesforce.com/s/articleView?id=sf.sfdx_setup_enable_devhub.htm&type=5) in your production Salesforce org. Workflows in this repo will use your org's DevHub to provision development and test sandboxes for your project.
-3. Create (or repurpose an existing) an admin user in your production org that will be used for deployments and sandbox provisioning. Store the username of this user in a repo secret named `SALESFORCE_DEVHUB_USERNAME`.  You can use the cli to set this secret with the following command: `gh secret set SALESFORCE_DEVHUB_USERNAME  -b "<sfdc-username>"`
-4. Create a [private key and certificate for use in the app you'll create in the next step](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_key_and_cert.htm)
-5. Create a connected app in your production Salesforce org for the octoforce CI/CD application that will be provisioning sandboxes and deploying to production.
+1. If you haven't already, [enable DevHub](https://help.salesforce.com/s/articleView?id=sf.sfdx_setup_enable_devhub.htm&type=5) in your production Salesforce org. Workflows in this repo will use your org's DevHub to provision development and test sandboxes for your project.
+1. Create (or repurpose an existing) an admin user in your production org that will be used for deployments and sandbox provisioning. Store the username of this user in a repo secret named `SALESFORCE_DEVHUB_USERNAME`.  You can use the cli to set this secret with the following command: <br/>`gh secret set SALESFORCE_DEVHUB_USERNAME  -b "<sfdc-username>"`
+1. Create a certificate and key pair for the JWT authentication flow that your actions will use with the following command: `openssl req -x509 -sha256 -nodes -days 1095 -newkey rsa:2048 -keyout salesforce.key -out salesforce.crt`
+    - Store the newly generated key in the 'SALESFORCE_JWT_KEY' secret in your repo with this command:<br/>`gh secret set SALESFORCE_JWT_KEY  < salesforce.key`
+1. Create an External Client App in your production Salesforce org for the octoforce CI/CD application that will be provisioning sandboxes and deploying to production.
    - Name your app 'octoforce' or something similar.
-   - Set the `Permitted Users` field to "Admin approved users are pre-authorized"
-   - Relax IP restrictions
-   - Check the "Enable OAuth Settings" field and grant the app the following permissions:
+   - For the Callback URL field, enter https://localhost
+   - Check the "Enable OAuth" field and grant the app the following OAuth Scopes:
      - Perform requests at any time
      - Manage user data via APIs
-   - For the Callback URL field, enter https://localhost
-   - Grant the "system administrator" profile (or whichever profile the user designated in step 3 is assigned) access to the new connected app
-   - Store the following secrets in your repo:
-     - `SALESFORCE_JWT_KEY` - use the contents of the server.key file generated in step 4 above
-     - `SALESFORCE_CLIENT_ID` - use the Consumer Key of the connected app you just created
-6. Clone your production org to create a sandbox named "template". This is the org that will be cloned to create your dev and uat sandboxes.
-7. When your newly created template sandbox is provisioned, configure it identically to how you did in step 5 above. You can use the same certificate and key pair or generate new ones. Create two repo secrets with the following values from your template sandbox:
-   - `SALESFORCE_TEMPLATE_CONSUMER_KEY` - use the consumer key of the octoforce connected app replicated from production to your template sandbox
-   - `SALESFORCE_TEMPLATE_JWT_SECRET_KEY` - use the value of the server.key file related to your template certificate
+   - In the "Flow Enablement" section check "Enable JWT Bearer Flow"
+   - Upload the certificate file generated in step 4
+   - In the "Security" section check the following settings:
+     - Require secret for Web Server Flow
+     - Require secret for Refresh Token Flow
+     - Require Proof Key for Code Exchange (PKCE) extension for Supported Authorization Flows 
+   - Save your app
+   - On the "Policies" tab of your app configuration, set the following attributes:
+     - Grant the "system administrator" profile (or whichever profile the user designated in step 3 is assigned) access to the new connected app
+     - Set the `Permitted Users` field to "Admin approved users are pre-authorized"
+     - Relax IP restrictions
+1. Once your app is fully configured, view its consumer key and secret.  Store the consumer key in your repo with this command:<br/>`gh secret set SALESFORCE_CLIENT_ID  -b "<consumer key>"`
+1. Clone your production org to create a sandbox named "template". This is the org that will be cloned to create your dev and uat sandboxes.
+1. When your newly created template sandbox is provisioned, create an External Client App in that org and configure it identically to how you did in steps 3-5 above. You can use the same certificate and key pair or generate new ones. Use the following commands to create separate repo secrets for your template org:
+   ```sh
+   gh secret set SALESFORCE_TEMPLATE_USERNAME  -b "<sfdc-template-org-username>"
+   gh secret set SALESFORCE_TEMPLATE_CONSUMER_KEY  -b "<consumer key>"
+   gh secret set SALESFORCE_TEMPLATE_JWT_SECRET_KEY  < salesforce.key
+   ```
    - `SALESFORCE_TEMPLATE_USERNAME` - use the username of the salesforce admin user replicated in your template sandbox
-8. [Follow these directions](https://github.com/github/octoforce-actions/blob/add-setup-docs/docs/SFDX%20Auth%20URLs%20%26%20Encryption.md) to generate and store your age encryption keys. Be sure to store the generated private key in the `SFDX_AUTH_SECRET_KEY` repo secret and to replace the contents of `auth/public-key.txt`.
-9. Create a GitHub PAT with "repo" scope and store its value as a secret in your repo with the key `SCOPED_PAT`.
-10. Configure the repository variables listed at the bottom of this document to your liking.
-11. Create a release branch in line with the release branch naming strategy you've decided upon.
-12. In your local copy of your new repo, run the `scripts/setup` script to install all required plugins.
-13. Import your Salesforce org's metadata into your repo:
+   - `SALESFORCE_TEMPLATE_CONSUMER_KEY` - use the consumer key of the "octoforce" connected app created in your template sandbox
+   - `SALESFORCE_TEMPLATE_JWT_SECRET_KEY` - use the value of the server.key file related to your template certificate
+1. [Follow these directions](https://github.com/github/octoforce-actions/blob/add-setup-docs/docs/SFDX%20Auth%20URLs%20%26%20Encryption.md) to generate and store your age encryption keys. Be sure to store the generated private key in the `SFDX_AUTH_SECRET_KEY` repo secret and to replace the contents of `auth/public-key.txt`.
+1. Create a GitHub PAT with "repo" scope and store its value as a secret in your repo with the key `SCOPED_PAT`.
+1. Configure the repository variables listed at the bottom of this document to your liking.
+1. Create a release branch in line with the release branch naming strategy you've decided upon.
+1. In your local copy of your new repo, run the `scripts/setup` script to install all required plugins.
+1. Import your Salesforce org's metadata into your repo:
     - Create an issue to import your Salesforce metadata into your repo.
     - Create a new branch for your issue, following the issue branch naming convention (e.g., issue-1 for your repo). **Wait for your dev and uat sandboxes to be fully provisioned before proceeding.**
     - Check out your new issue branch locally and run the `scripts/sandbox_auth` script. You will be prompted to log into your newly created dev and uat sandboxes.
@@ -79,7 +91,7 @@ These step-by-step instructions will walk you through your initial project setup
       - `git commit -m "initial metadata import"`
       - `git push origin`
     - Open a pull request for your issue branch against your release branch. A workflow will attempt to deploy your PR to the UAT org for your issue. You may need to refine your package.xml and .forceignore files and re-retrieve your org's metadata to get your deployment to pass.
-14. Once your UAT deployment passes, you can merge the pull request created above and create and merge a new pull request that merges your release branch to your main branch. This will deploy your metadata to your production org.
+1. Once your UAT deployment passes, you can merge the pull request created above and create and merge a new pull request that merges your release branch to your main branch. This will deploy your metadata to your production org.
 
 Consult the [dev flow](./Dev_Flow.md) documentation to learn how your team should use this project once it has been set up.
 
