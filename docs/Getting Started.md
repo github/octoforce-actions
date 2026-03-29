@@ -13,9 +13,10 @@ The workflows in this repo execute only on branches whose names match certain us
 | Release | REL- | RELEASE_BRANCH_PREFIX |
 
 You can assign thes values above using the GitHub CLI with the following commands:
-```
+```sh
 gh secret set ISSUE_BRANCH_PREFIX -b "issue-"
 gh secret set RELEASE_BRANCH_PREFIX -b "REL-"
+# If you are not in the repository directory, append: --repo OWNER/REPO
 ```
 
 #### Profile and permissionset format
