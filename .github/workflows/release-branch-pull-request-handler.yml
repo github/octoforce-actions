@@ -8,23 +8,65 @@ permissions:
 name: Release Branch Pull Request Handler
 on:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      pull_request_number:
+        description: "The pull request number to deploy"
+        required: true
+        type: number
+      include_destructive_changes:
+        description: "Include destructive changes in the deployment (if present)"
+        required: false
+        type: boolean
+        default: false
 jobs:
   deploy-to-uat-sandbox:
     runs-on: ubuntu-latest
-    if: startsWith(github.event.pull_request.base.ref, vars.RELEASE_BRANCH_PREFIX)
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.pull_request.base.ref, vars.RELEASE_BRANCH_PREFIX)
     steps:
+      - name: Check Required Secrets and Variables
+        run: |
+          missing=()
+          [ -z "$SCOPED_PAT" ] && missing+=("secret: SCOPED_PAT")
+          [ -z "$SFDX_AUTH_SECRET_KEY" ] && missing+=("secret: SFDX_AUTH_SECRET_KEY")
+          [ -z "$RELEASE_BRANCH_PREFIX" ] && missing+=("variable: RELEASE_BRANCH_PREFIX")
+          [ -z "$ISSUE_BRANCH_PREFIX" ] && missing+=("variable: ISSUE_BRANCH_PREFIX")
+          [ -z "$DEPLOYMENT_TIMEOUT" ] && missing+=("variable: DEPLOYMENT_TIMEOUT")
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required configuration:"
+            for item in "${missing[@]}"; do echo "  - $item"; done
+            exit 1
+          fi
+        env:
+          SCOPED_PAT: ${{ secrets.SCOPED_PAT }}
+          SFDX_AUTH_SECRET_KEY: ${{ secrets.SFDX_AUTH_SECRET_KEY }}
+          RELEASE_BRANCH_PREFIX: ${{ vars.RELEASE_BRANCH_PREFIX }}
+          ISSUE_BRANCH_PREFIX: ${{ vars.ISSUE_BRANCH_PREFIX }}
+          DEPLOYMENT_TIMEOUT: ${{ vars.DEPLOYMENT_TIMEOUT }}
+      - name: Resolve PR Branch
+        if: github.event_name == 'workflow_dispatch'
+        id: resolve_pr
+        env:
+          GH_TOKEN: ${{ secrets.SCOPED_PAT }}
+        run: |
+          branch=$(gh pr view ${{ inputs.pull_request_number }} --repo ${{ github.repository }} --json headRefName -q '.headRefName')
+          if [ -z "$branch" ]; then
+            echo "::error::Could not resolve branch for PR #${{ inputs.pull_request_number }}"
+            exit 1
+          fi
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
       - name: Checkout
         uses: actions/checkout@v2.5.0
         with:
           token: ${{ secrets.SCOPED_PAT }}
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && steps.resolve_pr.outputs.branch || github.event.pull_request.head.sha }}
           fetch-depth: 2
       - name: Setup Node
-        uses: actions/setup-node@v3.5.1
+        uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
       - name: Cache Node Modules
-        uses: actions/cache@v3.0.11
+        uses: actions/cache@v5
         id: npm_cache_id
         with:
           path: node_modules
@@ -38,18 +80,18 @@ jobs:
       - name: Parse Issue Number
         id: branchFilter
         env:
-          BRANCH_NAME: ${{ github.head_ref }}
+          BRANCH_NAME: ${{ github.event_name == 'workflow_dispatch' && steps.resolve_pr.outputs.branch || github.head_ref }}
           ISSUE_PREFIX: ${{ vars.ISSUE_BRANCH_PREFIX }}
         run: node ./node-scripts/branch-filter.js
       - name: Did Metadata or Auth Files Change
-        if: steps.branchFilter.outputs.matches == 'true'
-        uses: rdietrick/did-files-change@12ed863b722bc28052850c22b28a37f38b6eca8d
+        if: github.event_name != 'workflow_dispatch' && steps.branchFilter.outputs.matches == 'true'
+        uses: rdietrick/did-files-change@56b6fcc8069eae9c1031a48fe734f0d77ec95b5e
         id: requires-deploy
         with:
           pathspec: force-app auth
           sha: ${{ github.event.pull_request.head.sha }}
       - name: Recompose Profiles
-        if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1' && vars.SALESFORCE_FORMATTED_PROFILES_AND_PERMS == 'false'
+        if: steps.branchFilter.outputs.matches == 'true' && (github.event_name == 'workflow_dispatch' || steps.requires-deploy.outputs.changed == '1') && vars.DECOMPOSED_PROFILES_AND_PERMS == 'true'
         run: |
           echo y | npx sf plugins:install @rdietrick/sfdx-profile-decompose
           npx sf profiles:aggregate
@@ -63,21 +105,21 @@ jobs:
             echo "FIRST_DEPLOY=false" >> "$GITHUB_OUTPUT"; else echo "FIRST_DEPLOY=true" >> "$GITHUB_OUTPUT";
           fi
       - name: Generate Destructive Changes Param
-        if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'
+        if: steps.branchFilter.outputs.matches == 'true' && (github.event_name == 'workflow_dispatch' && inputs.include_destructive_changes || (github.event_name != 'workflow_dispatch' && steps.requires-deploy.outputs.changed == '1' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true'))
         id: check_for_destructive_changes
         run: |
           if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
-            echo "DESTRUCTIVE_FILES=--predestructivechanges destructive-changes/destructiveChangesPre.xml --postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
+            echo "DESTRUCTIVE_FILES=--pre-destructive-changes destructive-changes/destructiveChangesPre.xml --post-destructive-changes destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
           elif [ -f destructive-changes/destructiveChangesPre.xml ]
           then 
-            echo "DESTRUCTIVE_FILES=--predestructivechanges destructive-changes/destructiveChangesPre.xml" >> "$GITHUB_OUTPUT";
+            echo "DESTRUCTIVE_FILES=--pre-destructive-changes destructive-changes/destructiveChangesPre.xml" >> "$GITHUB_OUTPUT";
           elif [ -f destructive-changes/destructiveChangesPost.xml ]
           then 
-            echo "DESTRUCTIVE_FILES=--postdestructivechanges destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
+            echo "DESTRUCTIVE_FILES=--post-destructive-changes destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
           fi
       - name: Authenticate to UAT Sandbox
-        if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1'
+        if: steps.branchFilter.outputs.matches == 'true' && (github.event_name == 'workflow_dispatch' || steps.requires-deploy.outputs.changed == '1')
         env:
           LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
           SFDX_AUTH_SECRET_KEY: ${{ secrets.SFDX_AUTH_SECRET_KEY }}
@@ -87,8 +129,20 @@ jobs:
           age --decrypt -i key.txt ${LOGIN_ENC_FILE}.age > ${LOGIN_ENC_FILE}
           rm key.txt
           npx sf org login sfdx-url -f ${LOGIN_ENC_FILE} -a is${{ steps.branchFilter.outputs.issueNumber }}uat
+      - name: Validate PR Deployment
+        if: steps.branchFilter.outputs.matches == 'true' && (github.event_name == 'workflow_dispatch' || steps.requires-deploy.outputs.changed == '1') && vars.PR_VALIDATION_DEPLOY_DISABLED != 'true'
+        uses: ./.github/actions/pr-validate-core
+        with:
+          pr-number: ${{ github.event_name == 'workflow_dispatch' && inputs.pull_request_number || github.event.pull_request.number }}
+          run-tests-level: NoTestRun
+          github-token: ${{ secrets.SCOPED_PAT }}
+          post-pr-comment: false
+          apply-validation-label: false
+          destructive-changes-args: ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }}
+        env:
+          TARGET_ORG_ALIAS: is${{ steps.branchFilter.outputs.issueNumber }}uat
       - name: Deploy Source to Sandbox
-        if: steps.branchFilter.outputs.matches == 'true' && steps.requires-deploy.outputs.changed == '1'
+        if: steps.branchFilter.outputs.matches == 'true' && (github.event_name == 'workflow_dispatch' || steps.requires-deploy.outputs.changed == '1')
         env:
           LOGIN_ENC_FILE: auth/sandbox-login-url-${{ steps.branchFilter.outputs.branchName }}-uat.txt
         run: |
@@ -100,7 +154,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SCOPED_PAT }}
           ISSUE_URL: https://api.github.com/repos/${{ github.repository }}/issues/${{ steps.branchFilter.outputs.issueNumber }}
-          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REF: ${{ github.event_name == 'workflow_dispatch' && steps.resolve_pr.outputs.branch || github.head_ref }}
         run: |
           git fetch origin $HEAD_REF
           curl -H "Authorization: Bearer ${GITHUB_TOKEN}" -s ${ISSUE_URL} > issue.json
@@ -117,6 +171,6 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@75802d269e7721b5146d08f6063ba3097c55ad2b
         if: vars.GENERATE_RELEASE == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
         with:
-          branch: ${{ github.head_ref }}
+          branch: ${{ github.event_name == 'workflow_dispatch' && steps.resolve_pr.outputs.branch || github.head_ref }}
           commit_message: Issue release note
           file_pattern: release-notes/${{ vars.ISSUE_BRANCH_PREFIX }}${{ steps.branchFilter.outputs.issueNumber }}.md

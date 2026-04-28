@@ -1,0 +1,137 @@
+name: Manual Salesforce Validate Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr-number:
+        description: Pull request number to validate
+        required: true
+        type: string
+      target-org:
+        description: Target org for validation deployment
+        required: true
+        default: Template
+        type: choice
+        options:
+          - Template
+          - Production
+      run-tests-level:
+        description: Salesforce test level for validation deployment
+        required: true
+        default: RunLocalTests
+        type: choice
+        options:
+          - RunLocalTests
+          - NoTestRun
+          - RunAllTestsInOrg
+      include-destructive-changes:
+        description: Include destructive changes in the validation deployment (if present)
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: pr-validate-deploy-${{ github.event.inputs['pr-number'] || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-deploy:
+    name: Salesforce Validate Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve Target Ref
+        id: resolve_target
+        env:
+          PR_NUMBER: ${{ github.event.inputs['pr-number'] }}
+        run: |
+          if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "pr-number must be numeric"
+            exit 1
+          fi
+
+          echo "checkout_ref=refs/pull/$PR_NUMBER/head" >> $GITHUB_OUTPUT
+          echo "target_name=pr-$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@885641592076c27bfb56c028cd5612cdad63e16d
+        with:
+          fetch-depth: 1
+          ref: ${{ steps.resolve_target.outputs.checkout_ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Cache node modules
+        uses: actions/cache@v5
+        id: npm_cache_id
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
+            ${{ runner.os }}-
+
+      - name: Install Dependencies
+        if: steps.npm_cache_id.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Authenticate Production Org
+        if: inputs['target-org'] == 'Production'
+        env:
+          SALESFORCE_JWT_KEY: ${{ secrets.SALESFORCE_JWT_KEY }}
+          PROD_INSTANCE_URL: ${{ vars.SALESFORCE_PROD_INSTANCE_URL }}
+        run: |
+          echo "${SALESFORCE_JWT_KEY}" > server.key
+          INSTANCE_URL_ARG=""
+          if [ -n "$PROD_INSTANCE_URL" ]; then
+            INSTANCE_URL_ARG="--instance-url $PROD_INSTANCE_URL"
+          fi
+          echo "INSTANCE_URL_ARG=$INSTANCE_URL_ARG"
+          npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_PROD_USERNAME }} -a Production $INSTANCE_URL_ARG
+
+      - name: Authenticate Template Org
+        if: inputs['target-org'] == 'Template'
+        env:
+          SALESFORCE_TEMPLATE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_TEMPLATE_JWT_SECRET_KEY }}
+          TEMPLATE_INSTANCE_URL: ${{ vars.SALESFORCE_TEMPLATE_INSTANCE_URL }}
+        run: |
+          echo "${SALESFORCE_TEMPLATE_JWT_SECRET_KEY}" > server.key
+          INSTANCE_URL="${TEMPLATE_INSTANCE_URL:-https://test.salesforce.org}"
+          npx sfdx force:auth:jwt:grant --client-id ${{ secrets.SALESFORCE_TEMPLATE_CONSUMER_KEY }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_TEMPLATE_USERNAME }} -a Template --instance-url $INSTANCE_URL
+
+      - name: Delete server.key
+        run: rm -f server.key
+
+      - name: Generate Destructive Changes Param
+        if: inputs['include-destructive-changes']
+        id: check_for_destructive_changes
+        run: |
+          if [ -f destructive-changes/destructiveChangesPre.xml ] && [ -f destructive-changes/destructiveChangesPost.xml ]
+          then 
+            echo "DESTRUCTIVE_FILES=--pre-destructive-changes destructive-changes/destructiveChangesPre.xml --post-destructive-changes destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
+          elif [ -f destructive-changes/destructiveChangesPre.xml ]
+          then 
+            echo "DESTRUCTIVE_FILES=--pre-destructive-changes destructive-changes/destructiveChangesPre.xml" >> "$GITHUB_OUTPUT";
+          elif [ -f destructive-changes/destructiveChangesPost.xml ]
+          then 
+            echo "DESTRUCTIVE_FILES=--post-destructive-changes destructive-changes/destructiveChangesPost.xml" >> "$GITHUB_OUTPUT";
+          fi
+
+      - name: Run PR Validate Core
+        uses: ./.github/actions/pr-validate-core
+        with:
+          pr-number: ${{ inputs['pr-number'] }}
+          run-tests-level: ${{ inputs['run-tests-level'] }}
+          github-token: ${{ secrets.SCOPED_PAT }}
+          post-pr-comment: true
+          apply-validation-label: true
+          destructive-changes-args: ${{ steps.check_for_destructive_changes.outputs.DESTRUCTIVE_FILES }}
+        env:
+          TARGET_ORG_ALIAS: ${{ inputs['target-org'] }}

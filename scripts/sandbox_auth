@@ -6,6 +6,14 @@ BLUE_BOLD='\033[1;94m'
 COLOR_RESET='\033[0m'
 BRANCH_NAME=`git rev-parse --abbrev-ref HEAD`
 
+while [ "$1" != "" ]; do
+    case $1 in
+        --no-dev-auth )   noDevAuth=true
+                          ;;
+    esac
+    shift
+done
+
 if [[ $noDevAuth = true ]]; then
     echo "===> Skipping SFDC dev org authentication."
 else
@@ -42,11 +50,15 @@ else
     wait $PID
 fi
 
+if ! command -v jq >/dev/null 2>&1
+then
+    printf "\nERROR: jq is required to generate the encrypted sf auth URL file. Please install jq and re-run this script.\n"
+    exit 1
+fi
 echo "===> Generating encrypted sf auth URL file... "
-ORG_INFO="$(sf org display --target-org $UAT_ALIAS --verbose 2>/dev/null)"
-LOGIN_URL=$(echo "$ORG_INFO" | awk -F "Sfdx Auth Url" '{print $2}' | xargs)
 LOGIN_URL_FILE=auth/sandbox-login-url-${BRANCH_NAME}-uat.txt
-echo ${LOGIN_URL} > ${LOGIN_URL_FILE}
+sfdx org display -o $UAT_ALIAS --verbose --json 2>/dev/null | jq -r .result.sfdxAuthUrl > $LOGIN_URL_FILE
 cat ${LOGIN_URL_FILE} | age -r $(cat auth/public-key.txt) > ${LOGIN_URL_FILE}.age
 git add ${LOGIN_URL_FILE}.age
 echo -e "Encrypted login URL has been staged and stored in: ${GREEN}${LOGIN_URL_FILE}.age${COLOR_RESET}\n"
+

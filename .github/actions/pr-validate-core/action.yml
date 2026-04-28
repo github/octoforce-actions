@@ -1,0 +1,173 @@
+name: PR Validate Core
+
+description: Build delta manifest, run Salesforce dry-run validation, comment on PR, and apply validation label.
+
+inputs:
+  pr-number:
+    description: Pull request number to validate
+    required: true
+  run-tests-level:
+    description: Salesforce test level for validation deployment
+    required: true
+  github-token:
+    description: Token used for GitHub API calls
+    required: true
+  post-pr-comment:
+    description: Whether to post a PR comment after validation
+    required: false
+    default: "true"
+  apply-validation-label:
+    description: Whether to apply the prod-deploy-validated label
+    required: false
+    default: "true"
+  destructive-changes-args:
+    description: Destructive changes arguments to pass to the deploy command (e.g., --pre-destructive-changes ... --post-destructive-changes ...)
+    required: false
+    default: ""
+
+outputs:
+  has-metadata-changes:
+    description: Whether deployable metadata changes were detected
+    value: ${{ steps.delta_manifest.outputs.has_metadata_changes }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install profile decompose sfdx plugin
+      shell: bash
+      run: echo y | npx sf plugins:install @rdietrick/sfdx-profile-decompose
+
+    - name: Generate Delta Manifest from PR Changes
+      id: delta_manifest
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+      run: |
+        mapfile -t CHANGED_FILES < <(python3 ./scripts/get_pr_changed_force_app_files.py)
+
+        if [ ${#CHANGED_FILES[@]} -eq 0 ]; then
+          echo "has_metadata_changes=false" >> "$GITHUB_OUTPUT"
+          echo "No changes under force-app/. Skipping validation deploy."
+          exit 0
+        fi
+
+        echo "Raw changed force-app files detected: ${#CHANGED_FILES[@]}"
+        printf '%s\n' "${CHANGED_FILES[@]}"
+
+        declare -a DEPLOY_PATHS=()
+        declare -A CHANGED_PROFILE_NAMES=()
+        declare -A CHANGED_PERMISSIONSET_NAMES=()
+        NEEDS_AGGREGATION=false
+
+        for FILE_PATH in "${CHANGED_FILES[@]}"; do
+          case "$FILE_PATH" in
+            force-app/main/default/profiles/decomposed/*)
+              PROFILE_RELATIVE_PATH="${FILE_PATH#force-app/main/default/profiles/decomposed/}"
+              PROFILE_NAME="${PROFILE_RELATIVE_PATH%%/*}"
+              CHANGED_PROFILE_NAMES["$PROFILE_NAME"]=1
+              NEEDS_AGGREGATION=true
+              ;;
+            force-app/main/default/permissionsets/decomposed/*)
+              PERMISSIONSET_RELATIVE_PATH="${FILE_PATH#force-app/main/default/permissionsets/decomposed/}"
+              PERMISSIONSET_NAME="${PERMISSIONSET_RELATIVE_PATH%%/*}"
+              CHANGED_PERMISSIONSET_NAMES["$PERMISSIONSET_NAME"]=1
+              NEEDS_AGGREGATION=true
+              ;;
+            *)
+              DEPLOY_PATHS+=("$FILE_PATH")
+              ;;
+          esac
+        done
+
+        if [ "$NEEDS_AGGREGATION" = "true" ]; then
+          if [ -d "force-app/main/default/profiles/decomposed" ] || [ -d "force-app/main/default/permissionsets/decomposed" ]; then
+            echo "Detected decomposed profile/permission set changes; aggregating metadata."
+            npx sf profiles:aggregate
+          else
+            echo "Decomposed directories not found; skipping aggregation (may have been removed by a prior step)."
+          fi
+        fi
+
+        for PROFILE_NAME in "${!CHANGED_PROFILE_NAMES[@]}"; do
+          AGGREGATED_PROFILE_PATH="force-app/main/default/profiles/${PROFILE_NAME}.profile-meta.xml"
+          if [ ! -f "$AGGREGATED_PROFILE_PATH" ]; then
+            echo "::error::Expected aggregated profile file not found: ${AGGREGATED_PROFILE_PATH}"
+            exit 1
+          fi
+          DEPLOY_PATHS+=("$AGGREGATED_PROFILE_PATH")
+        done
+
+        for PERMISSIONSET_NAME in "${!CHANGED_PERMISSIONSET_NAMES[@]}"; do
+          AGGREGATED_PERMISSIONSET_PATH="force-app/main/default/permissionsets/${PERMISSIONSET_NAME}.permissionset-meta.xml"
+          if [ ! -f "$AGGREGATED_PERMISSIONSET_PATH" ]; then
+            echo "::error::Expected aggregated permission set file not found: ${AGGREGATED_PERMISSIONSET_PATH}"
+            exit 1
+          fi
+          DEPLOY_PATHS+=("$AGGREGATED_PERMISSIONSET_PATH")
+        done
+
+        mapfile -t DEPLOY_PATHS < <(printf '%s\n' "${DEPLOY_PATHS[@]}" | awk 'NF && !seen[$0]++')
+
+        if [ ${#DEPLOY_PATHS[@]} -eq 0 ]; then
+          echo "has_metadata_changes=false" >> "$GITHUB_OUTPUT"
+          echo "No deployable metadata paths found after processing changes."
+          exit 0
+        fi
+
+        echo "Deployable paths included in manifest: ${#DEPLOY_PATHS[@]}"
+        printf '%s\n' "${DEPLOY_PATHS[@]}"
+
+        MANIFEST_SOURCE_DIR_ARGS=()
+        for DEPLOY_PATH in "${DEPLOY_PATHS[@]}"; do
+          MANIFEST_SOURCE_DIR_ARGS+=("-p" "$DEPLOY_PATH")
+        done
+
+        npx sf project generate manifest \
+          -n temp-deploy-manifest \
+          "${MANIFEST_SOURCE_DIR_ARGS[@]}"
+
+        echo "has_metadata_changes=true" >> "$GITHUB_OUTPUT"
+
+    - name: Validate Deployment
+      if: steps.delta_manifest.outputs.has_metadata_changes == 'true'
+      shell: bash
+      env:
+        TARGET_ORG_ALIAS: ${{ env.TARGET_ORG_ALIAS }}
+        TEST_LEVEL: ${{ inputs.run-tests-level }}
+      run: npx sf project deploy start --dry-run -x temp-deploy-manifest.xml -o "$TARGET_ORG_ALIAS" -w 200 -l "$TEST_LEVEL" ${{ inputs.destructive-changes-args }}
+
+    - name: Comment on Pull Request
+      if: inputs.post-pr-comment == 'true'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+        TARGET_ORG_ALIAS: ${{ env.TARGET_ORG_ALIAS }}
+        HAS_METADATA_CHANGES: ${{ steps.delta_manifest.outputs.has_metadata_changes }}
+      run: |
+        RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+        if [ "${HAS_METADATA_CHANGES}" = "true" ]; then
+          printf -v COMMENT_BODY '✅ Salesforce validation deployment succeeded against %s using a manifest generated from changed PR files.\n\nWorkflow run: %s' "$TARGET_ORG_ALIAS" "$RUN_URL"
+        else
+          printf -v COMMENT_BODY '✅ No Salesforce metadata changes were detected under force-app/, so validation deployment was skipped.\n\nWorkflow run: %s' "$RUN_URL"
+        fi
+        COMMENT_JSON=$(python3 -c 'import json, sys; print(json.dumps({"body": sys.argv[1]}))' "$COMMENT_BODY")
+        curl -sS -X POST \
+          -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+          -H "Accept: application/vnd.github+json" \
+          "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+          -d "${COMMENT_JSON}"
+
+    - name: Apply Validation Label
+      if: steps.delta_manifest.outputs.has_metadata_changes == 'true' && inputs.apply-validation-label == 'true'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+      run: |
+        curl -sS -X POST \
+          -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+          -H "Accept: application/vnd.github+json" \
+          "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/labels" \
+          -d '{"labels":["prod-deploy-validated"]}'

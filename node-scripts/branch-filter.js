@@ -1,6 +1,6 @@
-const core = require("@actions/core");
-const github = require("@actions/github");
-const lodash = require("lodash");
+import * as core from "@actions/core";
+import * as github from "@actions/github";
+import lodash from "lodash";
 
 (function start() {
   try {
