@@ -21,7 +21,14 @@ gh secret set RELEASE_BRANCH_PREFIX -b "REL-"
 
 #### Profile and permissionset format
 
-If enabled in this project, an [sfdx plugin](https://www.npmjs.com/package/@rdietrick/sfdx-profile-decompose) can translate monolithic Salesforce profiles and permissionsets into more granular XML files in your project. We've found that this makes managing diffs and conflict resolution in these files much easier. When the plugin is enabled, each profile will, for instance, be broken down into separate files for each object that the profile maintains FLS for. To turn it on, set the repository variable `SALESFORCE_FORMATTED_PROFILES_AND_PERMS` to true. If the plugin is disabled, you will also need to remove or comment out the line in `scripts/retrieve` that executes the profiles:decompose plugin. If you choose to store only profiles or only permissionsets in your repo but wish to use this plugin, you'll need to pass the `--md-types=profiles` or `--md-types=permissionsets` argument to the profiles:decompose command in the retrieve script.
+If enabled in this project, an [sfdx plugin](https://www.npmjs.com/package/@rdietrick/sfdx-profile-decompose) can translate monolithic Salesforce profiles and permissionsets into more granular XML files in your project. We've found that this makes managing diffs and conflict resolution in these files much easier. When the plugin is enabled, each profile will, for instance, be broken down into separate files for each object that the profile maintains FLS for. To turn it on, set the repository variable `DECOMPOSED_PROFILES_AND_PERMS` to true and add the following two entries to your `.gitignore` file:
+
+```
+force-app/main/default/profiles/*-meta.xml
+force-app/main/default/permissionsets/*-meta.xml
+```
+
+If the plugin is disabled, you will also need to remove or comment out the line in `scripts/retrieve` that executes the profiles:decompose plugin. If you choose to store only profiles or only permissionsets in your repo but wish to use this plugin, you'll need to pass the `--md-types=profiles` or `--md-types=permissionsets` argument to the profiles:decompose command in the retrieve script.
 
 You can configure your repo for decomposed profiles with the following command:
 ```sh
@@ -107,7 +114,7 @@ The following secrets are required to be set in the repository settings:
   - This is the private key used to generate the JWT token. This is used to authenticate with Salesforce production.
 - `SALESFORCE_CLIENT_ID`
   - This is the client ID used to generate the JWT token. This is used to authenticate with Salesforce production.
-- `SALESFORCE_DEVHUB_USERNAME`
+- `SALESFORCE_PROD_USERNAME`
   - This is the username of the admin user of your DevHub/production org. This is used to authenticate with Salesforce production.
 - `SALESFORCE_TEMPLATE_CONSUMER_KEY`
   - This is the consumer key of the template org. This is used to authenticate with the template sandbox.
@@ -132,7 +139,13 @@ The following repository variables are required to be set in the repository sett
   - This is the prefix used for the release branch. This is used to identify branches where pull requests should be deployed to test sandbox.
 - `GENERATE_RELEASE`
   - This is a boolean feature flag that determines whether release notes should be generated.
-- `SALESFORCE_FORMATTED_PROFILES_AND_PERMS`
-  - This is a feature flag that is a boolean value that determines whether profiles and permissions should be formatted using the `profile:decompose` plugin.
+- `DECOMPOSED_PROFILES_AND_PERMS`
+  - When set to `true`, profiles and permission sets are stored in decomposed format using the `profile:decompose` plugin, and will be aggregated before deployment.
 - `DEPLOYMENT_TIMEOUT`
   - The number of minutes to wait for the `force:source:deploy` command to complete and display results.
+- `PR_VALIDATION_DEPLOY_DISABLED`
+  - If set to `true`, the validation deployment step is skipped during PR deployments.
+- `SALESFORCE_PROD_INSTANCE_URL`
+  - The instance URL for the production Salesforce org (e.g., `https://mycompany.my.salesforce.com`). Used when authenticating for production deployments. If not set, the `--instance-url` parameter is omitted from the auth command (defaulting to https://login.salesforce.com).
+- `SALESFORCE_TEMPLATE_INSTANCE_URL`
+  - The instance URL for the template sandbox (e.g., `https://mycompany--template.sandbox.my.salesforce.com`). Used when authenticating for template sandbox deployments. Defaults to `https://test.salesforce.org` if not set.

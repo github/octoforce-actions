@@ -1,6 +1,7 @@
 {
   "name": "octoforce-actions",
   "private": true,
+  "type": "module",
   "version": "1.0.0",
   "description": "A lightweight open-source Salesforce CI/CD framework built on the GitHub platform.",
   "scripts": {
@@ -16,22 +17,20 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/github": "^6.0.0",
+    "@actions/core": "^3.0.0",
+    "@actions/github": "^9.0.0",
     "@lwc/eslint-plugin-lwc": "^2.1.0",
-    "@prettier/plugin-xml": "^3.4.1",
+    "@prettier/plugin-xml": "^3.4.2",
     "@salesforce/eslint-config-lwc": "^3.7.1",
-    "@salesforce/eslint-plugin-aura": "^2.1.0",
     "@salesforce/eslint-plugin-lightning": "^1.0.1",
-    "@salesforce/sfdx-lwc-jest": "^7.0.1",
     "eslint": "^8.57.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jest": "^28.11.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jest": "^29.15.1",
     "husky": "^9.1.7",
-    "lint-staged": "^15.5.0",
-    "prettier": "^3.5.3",
-    "prettier-plugin-apex": "^2.2.5",
-    "@salesforce/cli": "^2.86.9"
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.1",
+    "prettier-plugin-apex": "^2.2.6",
+    "@salesforce/cli": "^2.128.5"
   },
   "overrides": {
     "braces": "3.0.3"

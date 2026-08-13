@@ -8,7 +8,7 @@
   "name": "octoforce-actions",
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "55.0",
+  "sourceApiVersion": "66.0",
   "plugins": {
     "sfdx-plugin-prettier": {
       "enabled": true
