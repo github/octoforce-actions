@@ -56,17 +56,17 @@ jobs:
           fi
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
       - name: Checkout
-        uses: actions/checkout@v2.5.0
+        uses: actions/checkout@e2f20e631ae6d7dd3b768f56a5d2af784dd54791 # v2.5.0
         with:
           token: ${{ secrets.SCOPED_PAT }}
           ref: ${{ github.event_name == 'workflow_dispatch' && steps.resolve_pr.outputs.branch || github.event.pull_request.head.sha }}
           fetch-depth: 2
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version-file: ".nvmrc"
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         id: npm_cache_id
         with:
           path: node_modules
