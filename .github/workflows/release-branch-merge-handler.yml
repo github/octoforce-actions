@@ -16,7 +16,7 @@ jobs:
     if: github.event.pull_request.merged == true && startsWith(github.base_ref, vars.RELEASE_BRANCH_PREFIX)
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.5.0
+        uses: actions/checkout@e2f20e631ae6d7dd3b768f56a5d2af784dd54791 # v2.5.0
         with:
           ref: ${{ github.base_ref }}
           fetch-depth: 0
