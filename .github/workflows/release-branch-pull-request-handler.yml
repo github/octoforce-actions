@@ -56,7 +56,7 @@ jobs:
           fi
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
       - name: Checkout
-        uses: actions/checkout@e2f20e631ae6d7dd3b768f56a5d2af784dd54791 # v2.5.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.SCOPED_PAT }}
           ref: ${{ github.event_name == 'workflow_dispatch' && steps.resolve_pr.outputs.branch || github.event.pull_request.head.sha }}
