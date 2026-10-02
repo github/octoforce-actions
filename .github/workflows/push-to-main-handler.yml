@@ -121,7 +121,7 @@ jobs:
       - name: Get Next Tag Version
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
         id: current_tag
-        uses: WyriHaximus/github-action-next-semvers@2fc363e72936d52dbd53eaa72f2c2db0d9207707
+        uses: WyriHaximus/github-action-next-semvers@1278b1df1ed4f4fcc526e0af650e08e7d60d1537
         with:
           version: ${{ steps.previous_tag.outputs.tag }}
 
