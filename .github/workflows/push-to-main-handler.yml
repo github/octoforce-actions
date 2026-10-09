@@ -135,7 +135,7 @@ jobs:
       - name: Create Release
         if: steps.check_release.outputs.IS_RELEASE == 'true' && steps.requires-deploy.outputs.changed == '1'
         id: create_release
-        uses: actions/create-release@c38d3a140cc22e67e265c5d5b6b4888d1f02533f
+        uses: actions/create-release@4c11c9fe1dcd9636620a16455165783b20fc7ea0
         env:
           GITHUB_TOKEN: ${{ secrets.SCOPED_PAT }}
         with:
