@@ -168,7 +168,7 @@ jobs:
           ISSUE_JSON="${ISSUE_JSON//$'\r'/'%0D'}"
           echo "ISSUE=$ISSUE_JSON" >> "$GITHUB_OUTPUT";
           rm issue.json
-      - uses: stefanzweifel/git-auto-commit-action@75802d269e7721b5146d08f6063ba3097c55ad2b
+      - uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d
         if: vars.GENERATE_RELEASE == 'true' && steps.check_first_deploy.outputs.FIRST_DEPLOY == 'true' && steps.branchFilter.outputs.matches == 'true'
         with:
           branch: ${{ github.event_name == 'workflow_dispatch' && steps.resolve_pr.outputs.branch || github.head_ref }}
