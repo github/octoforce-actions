@@ -18,7 +18,7 @@ jobs:
     name: Release to Production
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@e2f20e631ae6d7dd3b768f56a5d2af784dd54791
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
           token: ${{ secrets.SCOPED_PAT }}
